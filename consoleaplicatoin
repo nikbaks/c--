@@ -1,0 +1,44 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main() {
+    cout << "Завдання 1: Iнформацiя про книгу\n";
+    cout << "Name : \"The war and the peace\"\n";
+    cout << "Author : L.N. Tolstoj\n";
+    cout << "Izdatelstvo : Piter\n";
+    cout << "Pages : 500\n\n";
+
+
+    cout << "Завдання 2: Вiрш i звуковий сигнал\n";
+    cout << "Kraj lukomor'a dub zelenyj,\a\a\a\n";
+    cout << "I zolotyj lancyuh na nim:\a\a\a\n";
+    cout << "Shodnya, shonochi kit uchenyj\a\a\a\n";
+    cout << "Na lancyuhu kruzhl’aje tim\a\a\a\n\n";
+
+
+    cout << "Завдання 3: Кiлькiсть днiв у роцi\n";
+    int year;
+    cout << "Введiть рiк: ";
+    cin >> year;
+
+    int days = 365 + (!(year % 4) && ((year % 100) || !(year % 400)));
+    cout << "In " << year << " year = " << days << " days\n\n";
+
+
+
+    cout << "Завдання 4: Переведення копiйок у гривнi\n";
+    int hrn, kop;
+    cout << "Введiть гривнi: ";
+    cin >> hrn;
+    cout << "Введiть копiйки: ";
+    cin >> kop;
+
+    hrn += kop / 100;
+    kop = kop % 100;
+
+    cout << "Правильна сума: " << hrn << " грн " << kop << " коп.\n\n";
+
+
+    return 0;
+}
