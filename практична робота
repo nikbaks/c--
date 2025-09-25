@@ -1,0 +1,57 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int number;
+    cout << "Завдання 1: Введiть шестизначне число: ";
+    cin >> number;
+
+    if (number < 100000 || number > 999999) {
+        cout << "Помилка: число не шестизначне.\n\n";
+    }
+    else {
+        int first3 = number / 1000;
+        int last3 = number % 1000;
+
+        int sumFirst = first3 / 100 + (first3 / 10) % 10 + first3 % 10;
+        int sumLast = last3 / 100 + (last3 / 10) % 10 + last3 % 10;
+
+        if (sumFirst == sumLast)
+            cout << "Число щасливе!\n\n";
+        else
+            cout << "Число не щасливе.\n\n";
+    }
+
+    int num4;
+    cout << "Завданя 2: Введiть чотиризначне число: ";
+    cin >> num4;
+
+    if (num4 < 1000 || num4 > 9999) {
+        cout << "Помилка: число не чотиризначне.\n\n";
+    }
+    else {
+        int d1 = num4 / 1000;
+        int d2 = (num4 / 100) % 10;
+        int d3 = (num4 / 10) % 10;
+        int d4 = num4 % 10;
+
+        swap(d1, d2);
+        swap(d3, d4);
+
+        int newNum = d1 * 1000 + d2 * 100 + d3 * 10 + d4;
+        cout << "Нове число після обміну цифр: " << newNum << "\n\n";
+    }
+
+    int arr[7];
+    cout << "Завданя 3: Введiть 7 чисел через пробiл: ";
+    for (int i = 0; i < 7; i++) cin >> arr[i];
+
+    int maxNum = arr[0];
+    for (int i = 1; i < 7; i++)
+        if (arr[i] > maxNum)
+            maxNum = arr[i];
+
+  
+
+    return 0;
+}
