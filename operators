@@ -1,0 +1,41 @@
+#include <iostream>
+using namespace std;
+
+void seconds_to_time(int total_seconds) {
+    int h = total_seconds / 3600;
+    int m = (total_seconds % 3600) / 60;
+    int s = total_seconds % 60;
+    cout << "Поточний час: " << h << " год " << m << " хв " << s << " сек\n";
+
+    int seconds_in_day = 24 * 3600;
+    int rem = seconds_in_day - total_seconds;
+    if (rem < 0) rem = 0;
+    int rh = rem / 3600;
+    int rm = (rem % 3600) / 60;
+    int rs = rem % 60;
+    cout << "До півночі залишилось: " << rh << " год " << rm << " хв " << rs << " сек\n";
+}
+
+void circle(double diameter) {
+    const double PI = 3.141592653589793;
+    double r = diameter / 2.0;
+    double area = PI * r * r;
+    double circ = 2 * PI * r;
+    cout << "Площа: " << area << "\n";
+    cout << "Периметр: " << circ << "\n";
+}
+
+void two_numbers(double a, double b) {
+    cout << "Сума: " << (a + b) << "\n";
+    cout << "Добуток: " << (a * b) << "\n";
+    cout << "Середнє арифметичне: " << ((a + b) / 2.0) << "\n";
+}
+
+void three_numbers(double a, double b, double c) {
+    cout << "Сума: " << (a + b + c) << "\n";
+    cout << "Добуток: " << (a * b * c) << "\n";
+    cout << "Середнє арифметичне: " << ((a + b + c) / 3.0) << "\n";
+}
+
+    
+ 
