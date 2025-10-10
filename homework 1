@@ -1,0 +1,39 @@
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+void line() {
+    char c; int n, type, speed;
+    cout << "Символ, довжина, тип(1-гор,2-верт), швидкість(1-3): ";
+    cin >> c >> n >> type >> speed;
+    int delay = (speed == 1 ? 300 : speed == 2 ? 100 : 20);
+    for (int i = 0; i < n; i++) {
+        cout << c << (type == 2 ? '\n' : '\0');
+        this_thread::sleep_for(chrono::milliseconds(delay));
+    }
+    cout << "\n";
+}
+
+void dice() {
+    srand(time(0));
+    int ps = 0, cs = 0;
+    for (int i = 1; i <= 3; i++) {
+        int p = rand()%6 + 1 + rand()%6 + 1;
+        int c = rand()%6 + 1 + rand()%6 + 1;
+        cout << "Раунд " << i << ": Ви " << p << ", Комп " << c << "\n";
+        ps += p; cs += c;
+    }
+    cout << (ps > cs ? "Ви перемогли" : ps < cs ? "Комп виграв" : "Нічия") << "\n";
+}
+
+int main() {
+    int ch;
+    cout << "1 - Лінія\n2 - Гра 'Кубики'\nВаш вибір: ";
+    cin >> ch;
+    if (ch == 1) line();
+    else if (ch == 2) dice();
+    else cout << "Невірний вибір\n";
+}
