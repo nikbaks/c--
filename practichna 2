@@ -1,0 +1,16 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b, x;
+    cout << "Введіть межі діапазону: ";
+    cin >> a >> b;
+    if (a > b) swap(a, b);
+
+    do {
+        cout << "Введіть число: ";
+        cin >> x;
+    } while (x < a || x > b);
+
+    cout << "Число в діапазоні!\n";
+}
