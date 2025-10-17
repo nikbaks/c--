@@ -1,0 +1,27 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    const int N = 12;
+    double profit[N];
+
+    for (int i = 0; i < N; i++) {
+        cout << "Прибуток за " << i+1 << " місяць: ";
+        cin >> profit[i];
+    }
+
+    int start, end;
+    cout << "Ведіть діапазон (наприклад 3 6): ";
+    cin >> start >> end;
+
+    double minP = profit[start-1], maxP = profit[start-1];
+    int minM = start, maxM = start;
+
+    for (int i = start-1; i < end; i++) {
+        if (profit[i] < minP) { minP = profit[i]; minM = i+1; }
+        if (profit[i] > maxP) { maxP = profit[i]; maxM = i+1; }
+    }
+
+    cout << "Макс. прибуток у місяці " << maxM << " = " << maxP << endl;
+    cout << "мін. прибуток у місяці " << minM << " = " << minP << endl;
+}
