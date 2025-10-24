@@ -1,0 +1,64 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Завдання 1\n";
+    int n;
+    cout << "Ведіть розмір масиву: ";
+    cin >> n;
+    int a[100];
+
+    cout << "Ведіть елементи масиву: ";
+    for (int i = 0; i < n; i++)
+        cin >> a[i];
+
+    int j = 0;
+    for (int i = 0; i < n; i++) {
+        if (a[i] != 0) {
+            a[j] = a[i];
+            j++;
+        }
+    }
+
+    for (int i = j; i < n; i++)
+        a[i] = -1;
+
+    cout << "Після стискання: ";
+    for (int i = 0; i < n; i++)
+        cout << a[i] << " ";
+    cout << "\n\n";
+
+
+    cout << "Завдання 2\n";
+    int a1[5], a2[5], result[10];
+    cout << "ведіть 5 елементів першого масиву: ";
+    for (int i = 0; i < 5; i++)
+        cin >> a1[i];
+    cout << "Ведіть 5 елементів другого масиву: ";
+    for (int i = 0; i < 5; i++)
+        cin >> a2[i];
+
+    int index = 0;
+
+    for (int i = 0; i < 5; i++)
+        if (a1[i] > 0) result[index++] = a1[i];
+    for (int i = 0; i < 5; i++)
+        if (a2[i] > 0) result[index++] = a2[i];
+
+    for (int i = 0; i < 5; i++)
+        if (a1[i] == 0) result[index++] = a1[i];
+    for (int i = 0; i < 5; i++)
+        if (a2[i] == 0) result[index++] = a2[i];
+
+    for (int i = 0; i < 5; i++)
+        if (a1[i] < 0) result[index++] = a1[i];
+    for (int i = 0; i < 5; i++)
+        if (a2[i] < 0) result[index++] = a2[i];
+
+    cout << "Результуючий масив: ";
+    for (int i = 0; i < 10; i++)
+        cout << result[i] << " ";
+    cout << endl;
+
+    return 0;
+}
