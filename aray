@@ -1,0 +1,102 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+int main() {
+    int n, m, num;
+
+    // ===== Завдання 1 =====
+    cout << "Завдання 1\n";
+    cout << "Введіть кількість рядків і стовпців: ";
+    cin >> n >> m;
+    int a1[100][100];
+
+    cout << "Введіть число: ";
+    cin >> num;
+
+    a1[0][0] = num;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (i == 0 && j == 0) continue;
+            if (j == 0) a1[i][j] = a1[i - 1][m - 1] * 2;
+            else a1[i][j] = a1[i][j - 1] * 2;
+        }
+    }
+
+    cout << "Масив:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            cout << a1[i][j] << " ";
+        cout << endl;
+    }
+
+    // ===== Завдання 2 =====
+    cout << "\nЗавдання 2\n";
+    cout << "Введіть кількість рядків і стовпців: ";
+    cin >> n >> m;
+    int a2[100][100];
+
+    cout << "Введіть число: ";
+    cin >> num;
+
+    a2[0][0] = num;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (i == 0 && j == 0) continue;
+            if (j == 0) a2[i][j] = a2[i - 1][m - 1] + 1;
+            else a2[i][j] = a2[i][j - 1] + 1;
+        }
+    }
+
+    cout << "Масив:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            cout << a2[i][j] << " ";
+        cout << endl;
+    }
+
+    // ===== Завдання 3 =====
+    cout << "\nЗавдання 3\n";
+    cout << "Введіть кількість рядків і стовпців: ";
+    cin >> n >> m;
+    int a3[100][100], b[100][100];
+    srand(time(0));
+
+    // заповнення випадковими числами
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            a3[i][j] = rand() % 10;
+            cout << a3[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    int k;
+    string dir;
+    cout << "Введіть кількість зрушень: ";
+    cin >> k;
+    cout << "Напрям (вліво / вправо / вгору / вниз): ";
+    cin >> dir;
+
+    k = k % ((dir == "вліво" || dir == "вправо") ? m : n);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (dir == "вправо") b[i][(j + k) % m] = a3[i][j];
+            if (dir == "вліво") b[i][(j - k + m) % m] = a3[i][j];
+            if (dir == "вниз") b[(i + k) % n][j] = a3[i][j];
+            if (dir == "вгору") b[(i - k + n) % n][j] = a3[i][j];
+        }
+    }
+
+    cout << "Після зрушення:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            cout << b[i][j] << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+v
