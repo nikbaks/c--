@@ -1,0 +1,86 @@
+#include <iostream>
+#include <cmath>
+#include <string>
+using namespace std;
+
+
+double power(double base, int exponent) {
+    double result = 1;
+    for (int i = 0; i < abs(exponent); i++)
+        result *= base;
+    if (exponent < 0) result = 1 / result;
+    return result;
+}
+
+
+int sumRange(int a, int b) {
+    int sum = 0;
+    if (a > b) swap(a, b);
+    for (int i = a; i <= b; i++)
+        sum += i;
+    return sum;
+}
+
+
+bool isPerfect(int n) {
+    int sum = 0;
+    for (int i = 1; i < n; i++)
+        if (n % i == 0) sum += i;
+    return sum == n;
+}
+
+void perfectNumbersInRange(int a, int b) {
+    cout << "Досконалі числа між " << a << " і " << b << ": ";
+    bool found = false;
+    for (int i = a; i <= b; i++) {
+        if (isPerfect(i)) {
+            cout << i << " ";
+            found = true;
+        }
+    }
+    if (!found) cout << "немає";
+    cout << endl;
+}
+
+void showCard(string rank, string suit) {
+    cout << "Гральна карта: " << rank << " " << suit << endl;
+}
+
+bool isLucky(int num) {
+    if (num < 100000 || num > 999999) return false;
+    int a = num / 1000;   
+    int b = num % 1000;  
+    int sum1 = 0, sum2 = 0;
+    while (a > 0) { sum1 += a % 10; a /= 10; }
+    while (b > 0) { sum2 += b % 10; b /= 10; }
+    return sum1 == sum2;
+}
+
+
+int main() {
+    double base; int exp;
+    cout << "Введіть основу і показник степеня: ";
+    cin >> base >> exp;
+    cout << "Результат: " << power(base, exp) << endl;
+
+    int a, b;
+    cout << "\nВедіть два числа для суми діапазону: ";
+    cin >> a >> b;
+    cout << "Сума = " << sumRange(a, b) << endl;
+
+    cout << "\nВедіть межі для пошуку досконалих чисел: ";
+    cin >> a >> b;
+    perfectNumbersInRange(a, b);
+
+    string rank, suit;
+    cout << "\nВедіть карту (наприклад: Валет Піки): ";
+    cin >> rank >> suit;
+    showCard(rank, suit);
+
+    int num;
+    cout << "\nВедіть шестизначне число: ";
+    cin >> num;
+    cout << (isLucky(num) ? "Щасливе число!" : "Не щасливе") << endl;
+
+    return 0;
+}
