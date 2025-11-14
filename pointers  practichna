@@ -1,0 +1,46 @@
+#include <iostream>
+using namespace std;
+
+const int ROW = 3;
+const int COL = 4;
+
+void shiftRightOnce(int a[][COL]) {
+    for (int i = 0; i < ROW; i++) {
+        int last = a[i][COL - 1];
+        for (int j = COL - 1; j > 0; j--)
+            a[i][j] = a[i][j - 1];
+        a[i][0] = last;
+    }
+}
+
+void shiftRightRecursive(int a[][COL], int k) {
+    if (k == 0) return;    
+    shiftRightOnce(a);      
+    shiftRightRecursive(a, k - 1);  
+}
+
+void print(int a[][COL]) {
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COL; j++)
+            cout << a[i][j] << " ";
+        cout << endl;
+    }
+}
+
+int main() {
+    int a[ROW][COL] = {
+        {4, 5, 6, 7},
+        {1, 2, 4, 1},
+        {4, 5, 6, 9}
+    };
+
+    int k = 3;
+
+    cout << "Початковий масив:\n";
+    print(a);
+
+    shiftRightRecursive(a, k);
+
+    cout << "\nПісля зсуву на " << k << " вправо:\n";
+    print(a);
+}
