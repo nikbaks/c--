@@ -1,0 +1,141 @@
+#include <iostream>
+using namespace std;
+
+int binarySearch(int arr[], int left, int right, int target) {
+    if (left > right) return -1;
+
+    int mid = (left + right) / 2;
+
+    if (arr[mid] == target) return mid;
+    else if (arr[mid] > target)
+        return binarySearch(arr, left, mid - 1, target);
+    else
+        return binarySearch(arr, mid + 1, right, target);
+}
+
+void shiftRightOnce(int** a, int rows, int cols) {
+    for (int r = 0; r < rows; r++) {
+        int last = a[r][cols - 1];
+        for (int c = cols - 1; c > 0; c--)
+            a[r][c] = a[r][c - 1];
+        a[r][0] = last;
+    }
+}
+
+void shiftRight(int** a, int rows, int cols, int k) {
+    if (k == 0) return;
+    shiftRightOnce(a, rows, cols);
+    shiftRight(a, rows, cols, k - 1);
+}
+
+void shiftLeftOnce(int** a, int rows, int cols) {
+    for (int r = 0; r < rows; r++) {
+        int first = a[r][0];
+        for (int c = 0; c < cols - 1; c++)
+            a[r][c] = a[r][c + 1];
+        a[r][cols - 1] = first;
+    }
+}
+
+void shiftLeft(int** a, int rows, int cols, int k) {
+    if (k == 0) return;
+    shiftLeftOnce(a, rows, cols);
+    shiftLeft(a, rows, cols, k - 1);
+}
+
+int main() {
+    int choice;
+
+    cout << "== MENU ==\n";
+    cout << "1) - Рекурсивний бінарний пошук\n";
+    cout << "2) - Круговий зсув вправо\n";
+    cout << "3) - Круговий зсув вліво\n";
+    cout << "Ваш вибір: ";
+    cin >> choice;
+
+    if (choice == 1) {
+        int n, target;
+        cout << "Enter array size: ";
+        cin >> n;
+
+        int* a = new int[n];
+        cout << "Enter SORTED array:\n";
+        for (int i = 0; i < n; i++) cin >> a[i];
+
+        cout << "Enter value to search: ";
+        cin >> target;
+
+        int pos = binarySearch(a, 0, n - 1, target);
+
+        if (pos == -1) cout << "Not found\n";
+        else cout << "Found at index: " << pos << endl;
+
+        delete[] a;
+    }
+
+
+    else if (choice == 2) {
+        int rows, cols, k;
+        cout << "Enter rows and cols: ";
+        cin >> rows >> cols;
+
+        int** a = new int* [rows];
+        for (int i = 0; i < rows; i++) a[i] = new int[cols];
+
+        cout << "Enter matrix:\n";
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                cin >> a[i][j];
+
+        cout << "Enter shift count: ";
+        cin >> k;
+
+        shiftRight(a, rows, cols, k);
+
+        cout << "Shifted right:\n";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++)
+                cout << a[i][j] << " ";
+            cout << endl;
+        }
+
+        for (int i = 0; i < rows; i++) delete[] a[i];
+        delete[] a;
+    }
+
+
+    else if (choice == 3) {
+        int rows, cols, k;
+        cout << "Enter rows and cols: ";
+        cin >> rows >> cols;
+
+        int** a = new int* [rows];
+        for (int i = 0; i < rows; i++) a[i] = new int[cols];
+
+        cout << "Enter matrix:\n";
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                cin >> a[i][j];
+
+        cout << "Enter shift count: ";
+        cin >> k;
+
+        shiftLeft(a, rows, cols, k);
+
+        cout << "Shifted left:\n";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++)
+                cout << a[i][j] << " ";
+            cout << endl;
+        }
+
+        for (int i = 0; i < rows; i++) delete[] a[i];
+        delete[] a;
+    }
+
+    else {
+        cout << "Невірний вибір\n";
+    }
+
+    return 0;
+}
