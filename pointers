@@ -1,0 +1,124 @@
+#include <iostream>
+using namespace std;
+
+
+bool exists(int* arr, int size, int value) {
+    for (int i = 0; i < size; i++)
+        if (arr[i] == value) return true;
+    return false;
+}
+
+int main() {
+    int choice;
+
+    cout << "===== MENU =====\n";
+    cout << "1 - Завданя 1 (об'єднання двох масивів)\n";
+    cout << "2 - Завданя 2 (спільні елементи без повторень)\n";
+    cout << "3 - Завданя 3 (видалення парних/непарних)\n";
+    cout << "Ваш вибір: ";
+    cin >> choice;
+    cout << endl;
+
+    if (choice == 1) {
+
+        int M, N;
+        cout << "Enter M: ";
+        cin >> M;
+        cout << "Enter N: ";
+        cin >> N;
+
+        int* A = new int[M];
+        int* B = new int[N];
+
+        cout << "Enter elements of A:\n";
+        for (int i = 0; i < M; i++) cin >> A[i];
+
+        cout << "Enter elements of B:\n";
+        for (int i = 0; i < N; i++) cin >> B[i];
+
+        int sizeC = M + N;
+        int* C = new int[sizeC];
+
+        for (int i = 0; i < M; i++) C[i] = A[i];
+        for (int i = 0; i < N; i++) C[M + i] = B[i];
+
+        cout << "Result array C:\n";
+        for (int i = 0; i < sizeC; i++) cout << C[i] << " ";
+
+        delete[] A;
+        delete[] B;
+        delete[] C;
+    }
+
+    else if (choice == 2) {
+        int M, N;
+        cout << "Enter M: ";
+        cin >> M;
+        cout << "Enter N: ";
+        cin >> N;
+
+        int* A = new int[M];
+        int* B = new int[N];
+
+        cout << "Enter elements of A:\n";
+        for (int i = 0; i < M; i++) cin >> A[i];
+
+        cout << "Enter elements of B:\n";
+        for (int i = 0; i < N; i++) cin >> B[i];
+
+        int* C = new int[(M < N ? M : N)];
+        int sizeC = 0;
+
+        for (int i = 0; i < M; i++) {
+            if (exists(B, N, A[i]) && !exists(C, sizeC, A[i])) {
+                C[sizeC++] = A[i];
+            }
+        }
+
+        cout << "Common elements:\n";
+        for (int i = 0; i < sizeC; i++) cout << C[i] << " ";
+
+        delete[] A;
+        delete[] B;
+        delete[] C;
+    }
+
+    else if (choice == 3) {
+
+        int M;
+        cout << "Enter M: ";
+        cin >> M;
+
+        int* A = new int[M];
+
+        cout << "Enter elements of A:\n";
+        for (int i = 0; i < M; i++) cin >> A[i];
+
+        cout << "1 - remove even numbers\n";
+        cout << "2 - remove odd numbers\n";
+        int removeChoice;
+        cin >> removeChoice;
+
+        int* B = new int[M];
+        int sizeB = 0;
+
+        for (int i = 0; i < M; i++) {
+            if (removeChoice == 1 && A[i] % 2 != 0)
+                B[sizeB++] = A[i];
+            else if (removeChoice == 2 && A[i] % 2 == 0)
+                B[sizeB++] = A[i];
+        }
+
+        cout << "Result array:\n";
+        for (int i = 0; i < sizeB; i++) cout << B[i] << " ";
+
+        delete[] A;
+        delete[] B;
+    }
+
+    else {
+        cout << "Невірний вибір";
+    }
+
+    return 0;
+}
