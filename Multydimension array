@@ -1,0 +1,57 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void printMatrix(const vector<vector<int>>& mat) {
+    for (const auto& row : mat) {
+        for (int val : row) cout << val << " ";
+        cout << endl;
+    }
+    cout << endl;
+}
+
+void addRowEnd(vector<vector<int>>& mat, const vector<int>& row) {
+    mat.push_back(row);
+}
+
+void addRowStart(vector<vector<int>>& mat, const vector<int>& row) {
+    mat.insert(mat.begin(), row);
+}
+
+void addRowAt(vector<vector<int>>& mat, const vector<int>& row, size_t pos) {
+    if (pos > mat.size()) pos = mat.size();
+    mat.insert(mat.begin() + pos, row);
+}
+
+void deleteRow(vector<vector<int>>& mat, size_t pos) {
+    if (pos < mat.size()) mat.erase(mat.begin() + pos);
+}
+
+int main() {
+    vector<vector<int>> matrix = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+
+    cout << "Початкова матриця:" << endl;
+    printMatrix(matrix);
+
+    addRowEnd(matrix, {10, 11, 12});
+    cout << "Після додавання рядка в кінець:" << endl;
+    printMatrix(matrix);
+
+    addRowStart(matrix, {0, 0, 0});
+    cout << "Після додавання рядка на початок:" << endl;
+    printMatrix(matrix);
+
+    addRowAt(matrix, {99, 99, 99}, 2);
+    cout << "Після додавання рядка на позицію 2:" << endl;
+    printMatrix(matrix);
+
+    deleteRow(matrix, 3);
+    cout << "Після видалення рядка з позиції 3:" << endl;
+    printMatrix(matrix);
+
+    return 0;
+}
