@@ -1,0 +1,60 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct WashingMachine {
+    string brand;
+    string color;
+    double width;
+    double length;
+    double height;
+    int power;
+    int spinSpeed;
+    int temperature;
+};
+
+struct Iron {
+    string brand;
+    string model;
+    string color;
+    int minTemp;
+    int maxTemp;
+    bool steam;
+    int power;
+};
+
+struct Boiler {
+    string brand;
+    string color;
+    int power;
+    double volume;
+    int temperature;
+};
+
+int main() {
+    WashingMachine wm = {"LG", "White", 60.0, 55.0, 85.0, 2000, 1200, 90};
+    Iron iron = {"Philips", "GC4567", "Blue", 100, 220, true, 2400};
+    Boiler boiler = {"Ariston", "Silver", 1500, 50.0, 80};
+
+    cout << "Пральна машинка:" << endl;
+    cout << "Фірма: " << wm.brand << ", Колір: " << wm.color 
+         << ", Розміри: " << wm.width << "x" << wm.length << "x" << wm.height 
+         << ", Потужність: " << wm.power << "W"
+         << ", Швидкість віджиму: " << wm.spinSpeed 
+         << ", Температура: " << wm.temperature << "°C" << endl << endl;
+
+    cout << "Праска:" << endl;
+    cout << "Фірма: " << iron.brand << ", Модель: " << iron.model << ", Колір: " << iron.color
+         << ", Мін. температура: " << iron.minTemp << "°C"
+         << ", Макс. температура: " << iron.maxTemp << "°C"
+         << ", Подача пари: " << (iron.steam ? "Так" : "Ні")
+         << ", Потужність: " << iron.power << "W" << endl << endl;
+
+    cout << "Бойлер:" << endl;
+    cout << "Фірма: " << boiler.brand << ", Колір: " << boiler.color
+         << ", Потужність: " << boiler.power << "W"
+         << ", Обсяг: " << boiler.volume << "л"
+         << ", Температура нагріву: " << boiler.temperature << "°C" << endl;
+
+    return 0;
+}
