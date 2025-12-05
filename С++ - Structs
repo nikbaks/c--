@@ -1,0 +1,121 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Book {
+    string title;
+    string author;
+    string publisher;
+    string genre;
+};
+
+void printBook(const Book& b) {
+    cout << "Назва: " << b.title << "\nАвтор: " << b.author
+         << "\nВидавництво: " << b.publisher << "\nЖанр: " << b.genre << "\n\n";
+}
+
+void printAll(Book arr[], int n) {
+    for (int i = 0; i < n; i++)
+        printBook(arr[i]);
+}
+
+void editBook(Book& b) {
+    cout << "Нова назва: ";
+    getline(cin, b.title);
+    cout << "Новий автор: ";
+    getline(cin, b.author);
+    cout << "Нове видавництво: ";
+    getline(cin, b.publisher);
+    cout << "Новий жанр: ";
+    getline(cin, b.genre);
+}
+
+void searchByAuthor(Book arr[], int n, string key) {
+    for (int i = 0; i < n; i++)
+        if (arr[i].author == key)
+            printBook(arr[i]);
+}
+
+void searchByTitle(Book arr[], int n, string key) {
+    for (int i = 0; i < n; i++)
+        if (arr[i].title == key)
+            printBook(arr[i]);
+}
+
+void sortByTitle(Book arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = i + 1; j < n; j++)
+            if (arr[i].title > arr[j].title)
+                swap(arr[i], arr[j]);
+}
+
+void sortByAuthor(Book arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = i + 1; j < n; j++)
+            if (arr[i].author > arr[j].author)
+                swap(arr[i], arr[j]);
+}
+
+void sortByPublisher(Book arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = i + 1; j < n; j++)
+            if (arr[i].publisher > arr[j].publisher)
+                swap(arr[i], arr[j]);
+}
+
+int main() {
+    Book arr[10] = {
+        {"Гаррі Поттер", "Джоан Роулінг", "А-БА-БА-ГА-ЛА-МА-ГА", "Фентезі"},
+        {"Місто", "Валер'ян Підмогильний", "Книгоспілка", "Роман"},
+        {"Тигролови", "Іван Багряний", "Видавництво Дніпро", "Пригоди"},
+        {"1984", "Джордж Орвелл", "Knygy", "Антиутопія"},
+        {"Маленький принц", "Антуан де Сент-Екзюпері", "Перелік", "Філософія"},
+        {"Захар Беркут", "Іван Франко", "Школа", "Історичний"},
+        {"Кайдашева сім'я", "Іван Нечуй-Левицький", "Веселка", "Повість"},
+        {"Чорний ворон", "Василь Шкляр", "Клуб сімейного дозвілля", "Історичний"},
+        {"Пригоди Тома Сойєра", "Марк Твен", "Folio", "Пригоди"},
+        {"Мертвi душi", "Микола Гоголь", "Альфа", "Роман"}
+    };
+
+    int choice;
+    while (true) {
+        cout << "1. Друк усіх книг\n";
+        cout << "2. Редагувати книгу\n";
+        cout << "3. Пошук за автором\n";
+        cout << "4. Пошук за назвою\n";
+        cout << "5. Сортування за назвою\n";
+        cout << "6. Сортування за автором\n";
+        cout << "7. Сортування за видавництвом\n";
+        cout << "8. Вихід\n";
+        cout << "Ваш вибір: ";
+        cin >> choice;
+        cin.ignore();
+
+        if (choice == 1) printAll(arr, 10);
+        else if (choice == 2) {
+            int id;
+            cout << "Номер книги (0-9): ";
+            cin >> id;
+            cin.ignore();
+            if (id >= 0 && id < 10) editBook(arr[id]);
+        }
+        else if (choice == 3) {
+            string key;
+            cout << "Автор: ";
+            getline(cin, key);
+            searchByAuthor(arr, 10, key);
+        }
+        else if (choice == 4) {
+            string key;
+            cout << "Назва: ";
+            getline(cin, key);
+            searchByTitle(arr, 10, key);
+        }
+        else if (choice == 5) sortByTitle(arr, 10);
+        else if (choice == 6) sortByAuthor(arr, 10);
+        else if (choice == 7) sortByPublisher(arr, 10);
+        else if (choice == 8) break;
+    }
+
+    return 0;
+}
