@@ -1,0 +1,53 @@
+
+
+#include <iostream>
+
+ using namespace std;
+
+ class Point {
+	 int x;
+	 int y;
+	 int z;
+ public:
+	 void initfromkeyboard() {
+		 cout << "enter x";
+		 cin >> x;
+		 cout << "enter y";
+		 cin >> y; cout << "enter z";
+		 cin >> z;
+	 }
+	 void print()
+	 {
+		 cout << x << " " << y << z << endl;
+	 }
+	 void setX(int x) {
+		 this->x = x;
+	 }
+	 void setY(int y) {
+		 this->y = y;
+
+	 }void setZ(int z) {
+		 this->z = z;
+	 }
+	 int getX() {
+		 return x;
+
+	 } int getY() {
+		 return y;
+	 } 
+	 int getZ() {
+		 return z;
+	 }
+ };
+
+int main()
+{
+	Point p;
+	p.setX(25);
+	p.setY(25);
+	p.setZ(25);
+	p.print();
+	p.initfromkeyboard();
+	p.print();
+
+}
