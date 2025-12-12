@@ -1,0 +1,58 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Student {
+private:
+    string name;
+    string birthDate;
+    string phone;
+    string city;
+    string country;
+    string university;
+    string universityCity;
+    string universityCountry;
+    string group;
+
+public:
+    void input() {
+        getline(cin, name);
+        getline(cin, birthDate);
+        getline(cin, phone);
+        getline(cin, city);
+        getline(cin, country);
+        getline(cin, university);
+        getline(cin, universityCity);
+        getline(cin, universityCountry);
+        getline(cin, group);
+    }
+
+    void output() const {
+        cout << name << endl;
+        cout << birthDate << endl;
+        cout << phone << endl;
+        cout << city << endl;
+        cout << country << endl;
+        cout << university << endl;
+        cout << universityCity << endl;
+        cout << universityCountry << endl;
+        cout << group << endl;
+    }
+
+    string getName() const { return name; }
+    string getBirthDate() const { return birthDate; }
+    string getPhone() const { return phone; }
+    string getCity() const { return city; }
+    string getCountry() const { return country; }
+    string getUniversity() const { return university; }
+    string getUniversityCity() const { return universityCity; }
+    string getUniversityCountry() const { return universityCountry; }
+    string getGroup() const { return group; }
+};
+
+int main() {
+    Student st;
+    st.input();
+    st.output();
+    return 0;
+}
