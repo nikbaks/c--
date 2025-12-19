@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Intro to DOM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 120px;
+            height: 120px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #f9f9f9;
+        }
+
+        .card span {
+            margin-top: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>What do I have in my fridge?</h2>
+
+<div id="products"></div>
+
+<script>
+const products = [
+    "Pepper", "Apple", "Cheese", "Corn",
+    "Mushroom", "Garlic", "Beef", "Fish",
+    "Eggs", "Coriander"
+];
+
+const container = document.getElementById("products");
+
+products.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const name = document.createElement("span");
+    name.textContent = item;
+
+    card.appendChild(name);
+    container.appendChild(card);
+});
+</script>
+
+</body>
+</html>
