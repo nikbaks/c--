@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Пошук користувача GitHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+        input, button {
+            padding: 8px;
+            font-size: 16px;
+        }
+        .card {
+            background: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        img {
+            width: 120px;
+            border-radius: 50%;
+        }
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Пошук користувача GitHub</h2>
+
+<input type="text" id="username" placeholder="Введіть логін GitHub">
+<button id="searchBtn">Пошук</button>
+
+<div id="result"></div>
+
+<script>
+    const button = document.getElementById('searchBtn');
+    const result = document.getElementById('result');
+
+    button.addEventListener('click', () => {
+        const username = document.getElementById('username').value.trim();
+        if (!username) return;
+
+        fetch(`https://api.github.com/users/${username}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Not Found") {
+                    result.innerHTML = "<p>Користувача не знайдено</p>";
+                    return;
+                }
+
+                result.innerHTML = `
+                    <div class="card">
+                        <img src="${data.avatar_url}" alt="Фото профілю">
+                        <h3>${data.name || "Ім'я відсутнє"} (${data.login})</h3>
+                        <p><strong>Профіль GitHub:</strong>
+                            <a href="${data.html_url}" target="_blank">${data.html_url}</a>
+                        </p>
+                        <p><strong>Блог:</strong>
+                            ${data.blog ? `<a href="${data.blog}" target="_blank">${data.blog}</a>` : "—"}
+                        </p>
+                        <p><strong>Місце проживання:</strong> ${data.location || "—"}</p>
+                        <p><strong>Email:</strong> ${data.email || "—"}</p>
+                        <p><strong>Підписники:</strong> ${data.followers}</p>
+                        <p><strong>Підписки:</strong> ${data.following}</p>
+                        <p><strong>Публічні репозиторії:</strong> ${data.public_repos}</p>
+                    </div>
+                `;
+            })
+            .catch(() => {
+                result.innerHTML = "<p>Помилка при завантаженні даних</p>";
+            });
+    });
+</script>
+
+</body>
+</html>
