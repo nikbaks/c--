@@ -1,0 +1,93 @@
+setTimeout(() => {
+    console.log("Повідомлення через 3 секунди");
+}, 3000);
+
+function greetUser(name) {
+    setTimeout(() => {
+        console.log("Привіт, " + name + "!");
+    }, 2000);
+}
+greetUser("Іван");
+
+let count = 1;
+let counter = setInterval(() => {
+    console.log(count);
+    count++;
+    if (count > 10) clearInterval(counter);
+}, 1000);
+
+let timer = 10;
+let countdown = setInterval(() => {
+    console.log(timer);
+    timer--;
+    if (timer < 0) {
+        console.log("Старт!");
+        clearInterval(countdown);
+    }
+}, 1000);
+
+function showDate() {
+    let d = new Date();
+    let day = String(d.getDate()).padStart(2, "0");
+    let month = String(d.getMonth() + 1).padStart(2, "0");
+    let year = d.getFullYear();
+    console.log(day + "." + month + "." + year);
+}
+showDate();
+
+function getAge(birthYear) {
+    return new Date().getFullYear() - birthYear;
+}
+console.log(getAge(2008));
+
+function daysToNewYear() {
+    let now = new Date();
+    let newYear = new Date(now.getFullYear() + 1, 0, 1);
+    let diff = newYear - now;
+    let days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    console.log(days);
+}
+daysToNewYear();
+
+function random100() {
+    return Math.floor(Math.random() * 100) + 1;
+}
+console.log(random100());
+
+function dice() {
+    return Math.floor(Math.random() * 6) + 1;
+}
+console.log(dice());
+
+function maxOfThree(a, b, c) {
+    return Math.max(a, b, c);
+}
+console.log(maxOfThree(5, 12, 8));
+
+function countdownToDate(targetDate) {
+    let interval = setInterval(() => {
+        let now = new Date();
+        let diff = targetDate - now;
+        if (diff <= 0) {
+            console.log("Час настав!");
+            clearInterval(interval);
+            return;
+        }
+        let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        let minutes = Math.floor((diff / (1000 * 60)) % 60);
+        let seconds = Math.floor((diff / 1000) % 60);
+        console.log(days, hours, minutes, seconds);
+    }, 1000);
+}
+countdownToDate(new Date(2026, 0, 1));
+
+setInterval(() => {
+    console.log(new Date().toLocaleTimeString());
+}, 1000);
+
+let isRed = true;
+setInterval(() => {
+    console.log(isRed ? "RED" : "BLUE");
+    isRed = !isRed;
+}, 500);
