@@ -1,0 +1,54 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Abonent {
+private:
+    string pib;
+    string homePhone;
+    string workPhone;
+    string mobilePhone;
+    string info;
+
+public:
+    static int count;
+
+    Abonent() : Abonent("Невідомо", "-", "-", "-", "-") {}
+
+    Abonent(string pib) : Abonent(pib, "-", "-", "-", "-") {}
+
+    Abonent(string pib, string home, string work, string mobile, string info)
+        : pib(pib), homePhone(home), workPhone(work), mobilePhone(mobile), info(info) {
+        count++;
+    }
+
+    void show() const {
+        cout << "ПІБ: " << pib << endl;
+        cout << "Домашній: " << homePhone << endl;
+        cout << "Робочий: " << workPhone << endl;
+        cout << "Мобільний: " << mobilePhone << endl;
+        cout << "Інфо: " << info << endl;
+        cout << "----------------------" << endl;
+    }
+
+    static int getCount() {
+        return count;
+    }
+};
+
+int Abonent::count = 0;
+
+int main() {
+    Abonent a1;
+    Abonent a2("Іваненко Іван");
+    Abonent a3("Петренко Петро", "123-45-67", "765-43-21", "099-111-22-33", "Друг");
+
+    a1.show();
+    a2.show();
+    a3.show();
+
+    cout << "Кількість абонентів: " << Abonent::getCount() << endl;
+
+    return 0;
+}
