@@ -1,0 +1,32 @@
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+class Time {
+    int h, m, s;
+public:
+    Time() : h(0), m(0), s(0) {}
+    Time(int hh, int mm, int ss) : h(hh), m(mm), s(ss) {}
+    explicit Time(int sec) {
+        h = sec / 3600;
+        m = (sec / 60) % 60;
+        s = sec % 60;
+    }
+
+    void print() const {
+        cout << setfill('0') << setw(2) << h << ":"
+             << setw(2) << m << ":" << setw(2) << s << "\n";
+    }
+
+    Time& operator++() { s++; if(s>=60){s=0;m++;} if(m>=60){m=0;h++;} return *this; }
+
+    bool operator==(const Time& t) const { return h==t.h && m==t.m && s==t.s; }
+    bool operator!=(const Time& t) const { return !(*this==t); }
+    bool operator>(const Time& t) const { return (h*3600+m*60+s) > (t.h*3600+t.m*60+t.s); }
+};
+
+int main() {
+    Time t1(11,59,59); ++t1; t1.print(); // 12:00:00
+    Time t2(5555); t2.print();           // 01:32:35
+    cout << (t1>t2) << endl;             // порівняння
+}
