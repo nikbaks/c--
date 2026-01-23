@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Користувачі та їх справи</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { margin-top: 30px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; cursor: pointer; }
+    li:hover { background: #f0f0f0; }
+    .todo { margin-left: 20px; }
+    .completed { text-decoration: line-through; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>Список користувачів</h1>
+  <ul id="users"></ul>
+
+  <h2>Справи користувача</h2>
+  <ul id="todos"></ul>
+
+  <script>
+    const usersList = document.getElementById('users');
+    const todosList = document.getElementById('todos');
+
+    // Завантаження користувачів
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then(response => response.json())
+      .then(users => {
+        users.forEach(user => {
+          const li = document.createElement('li');
+          li.textContent = user.name;
+          li.addEventListener('click', () => loadTodos(user.id));
+          usersList.appendChild(li);
+        });
+      })
+      .catch(error => console.error('Помилка завантаження користувачів:', error));
+
+    // Завантаження справ конкретного користувача
+    function loadTodos(userId) {
+      todosList.innerHTML = '<li>Завантаження...</li>';
+      fetch(`https://jsonplaceholder.typicode.com/users/${userId}/todos`)
+        .then(response => response.json())
+        .then(todos => {
+          todosList.innerHTML = '';
+          todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.textContent = todo.title;
+            li.className = 'todo' + (todo.completed ? ' completed' : '');
+            todosList.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Помилка завантаження справ:', error));
+    }
+  </script>
+</body>
+</html>
