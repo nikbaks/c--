@@ -1,0 +1,102 @@
+import React from "react";
+
+const Header = ({ title }) => {
+  return (
+    <header className="header">
+      <h1>{title}</h1>
+      <nav>
+        <a href="#article">Стаття</a>
+        <a href="#author">Автор</a>
+      </nav>
+    </header>
+  );
+};
+
+const AuthorInfo = ({ name, bio, avatar }) => {
+  return (
+    <section id="author" className="author">
+      <img src={avatar} alt={name} />
+      <div>
+        <h3>{name}</h3>
+        <p>{bio}</p>
+      </div>
+    </section>
+  );
+};
+
+const Article = ({ title, text, image }) => {
+  return (
+    <article id="article" className="article">
+      <h2>{title}</h2>
+      <img src={image} alt={title} />
+      <p>{text}</p>
+      <a href="https://react.dev" target="_blank">Дізнатися більше про React</a>
+    </article>
+  );
+};
+
+export default function App() {
+  return (
+    <div className="container">
+      <Header title="Мій блог" />
+
+      <Article
+        title="Чому варто вивчати React"
+        image="https://via.placeholder.com/600x300"
+        text="React — це популярна JavaScript-бібліотека для створення користувацьких інтерфейсів. Вона дозволяє розбивати інтерфейс на компоненти та ефективно оновлювати сторінку." 
+      />
+
+      <AuthorInfo
+        name="Іван Петренко"
+        bio="Frontend-розробник, який любить React та сучасні вебтехнології."
+        avatar="https://via.placeholder.com/100"
+      />
+
+      <style>{`
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          background: #f4f4f4;
+        }
+        .container {
+          max-width: 800px;
+          margin: auto;
+          background: #fff;
+        }
+        .header {
+          background: #222;
+          color: #fff;
+          padding: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .header a {
+          color: #fff;
+          margin-left: 15px;
+          text-decoration: none;
+        }
+        .article {
+          padding: 20px;
+        }
+        .article img {
+          width: 100%;
+          margin: 15px 0;
+        }
+        .article a {
+          color: #0066cc;
+        }
+        .author {
+          display: flex;
+          align-items: center;
+          padding: 20px;
+          border-top: 1px solid #ddd;
+        }
+        .author img {
+          border-radius: 50%;
+          margin-right: 15px;
+        }
+      `}</style>
+    </div>
+  );
+}
