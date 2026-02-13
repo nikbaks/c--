@@ -1,0 +1,86 @@
+#include <iostream>
+using namespace std;
+
+class CharStack {
+private:
+    char* data;
+    int top;
+    int capacity;
+
+public:
+    CharStack(int size = 10) {
+        capacity = size;
+        top = -1;
+        data = new char[capacity];
+    }
+
+    ~CharStack() {
+        delete[] data;
+    }
+
+    bool push(char c) {
+        if (isFull()) return false;
+        data[++top] = c;
+        return true;
+    }
+
+    bool pop(char& removed) {
+        if (isEmpty()) return false;
+        removed = data[top--];
+        return true;
+    }
+
+    bool peek(char& topChar) const {
+        if (isEmpty()) return false;
+        topChar = data[top];
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == -1;
+    }
+
+    bool isFull() const {
+        return top == capacity - 1;
+    }
+
+    int size() const {
+        return top + 1;
+    }
+
+    void clear() {
+        top = -1;
+    }
+
+    void print() const {
+        for (int i = 0; i <= top; i++)
+            cout << data[i] << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    CharStack s(5);
+
+    s.push('A');
+    s.push('B');
+    s.push('C');
+
+    s.print();
+
+    char x;
+    s.pop(x);
+    cout << x << endl;
+
+    s.peek(x);
+    cout << x << endl;
+
+    cout << s.size() << endl;
+    cout << (s.isEmpty() ? "Yes" : "No") << endl;
+    cout << (s.isFull() ? "Yes" : "No") << endl;
+
+    s.clear();
+    cout << (s.isEmpty() ? "Yes" : "No") << endl;
+
+    return 0;
+}
