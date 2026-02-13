@@ -1,0 +1,49 @@
+function MovieCard({ title, director, year, studio, poster }) {
+  return (
+    <div className="card">
+      <img src={poster} alt={title} />
+      <h2>{title}</h2>
+      <p><b>Режисер:</b> {director}</p>
+      <p><b>Рік:</b> {year}</p>
+      <p><b>Кіностудія:</b> {studio}</p>
+    </div>
+  );
+}
+
+export default function App() {
+  const movies = [
+    {
+      title: "Interstellar",
+      director: "Christopher Nolan",
+      year: 2014,
+      studio: "Paramount Pictures",
+      poster: "https://m.media-amazon.com/images/I/91kFYg4fX3L._AC_SL1500_.jpg"
+    },
+    {
+      title: "Inception",
+      director: "Christopher Nolan",
+      year: 2010,
+      studio: "Warner Bros.",
+      poster: "https://m.media-amazon.com/images/I/81p+xe8cbnL._AC_SL1500_.jpg"
+    },
+    {
+      title: "The Matrix",
+      director: "Lana & Lilly Wachowski",
+      year: 1999,
+      studio: "Warner Bros.",
+      poster: "https://m.media-amazon.com/images/I/51vpnbwFHrL._AC_.jpg"
+    }
+  ];
+
+  return (
+    <div className="container">
+      <h1>🎬 Улюблені фільми</h1>
+
+      <div className="grid">
+        {movies.map((movie, index) => (
+          <MovieCard key={index} {...movie} />
+        ))}
+      </div>
+    </div>
+  );
+}
