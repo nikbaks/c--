@@ -1,0 +1,102 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+struct Vagon
+{
+    int number;
+    int seats;
+    int passengers;
+
+    Vagon() : number(0), seats(0), passengers(0) {}
+
+    Vagon(int n, int s, int p)
+    {
+        number = n;
+        seats = s;
+        passengers = p;
+    }
+
+    void Show() const
+    {
+        cout << "Вагон №" << number
+             << " | Місць: " << seats
+             << " | Пасажирів: " << passengers << endl;
+    }
+};
+
+class Train
+{
+private:
+    string model;
+    vector<Vagon> vagons;
+
+public:
+    Train() : model("Невідома модель") {}
+
+    Train(string m, const vector<Vagon>& v)
+    {
+        model = m;
+        vagons = v;
+    }
+
+    Train(const Train& other)
+    {
+        model = other.model;
+        vagons = other.vagons;
+    }
+
+    void Show() const
+    {
+        cout << "Модель потяга: " << model << endl;
+        cout << "Кількість вагонів: " << vagons.size() << endl;
+
+        for (const auto& v : vagons)
+            v.Show();
+    }
+
+    void AddFirst(const Vagon& v)
+    {
+        vagons.insert(vagons.begin(), v);
+    }
+
+    void AddLast(const Vagon& v)
+    {
+        vagons.push_back(v);
+    }
+
+    void RemoveFirst()
+    {
+        if (!vagons.empty())
+            vagons.erase(vagons.begin());
+    }
+
+    void RemoveLast()
+    {
+        if (!vagons.empty())
+            vagons.pop_back();
+    }
+};
+
+int main()
+{
+    Vagon v1(1, 50, 45);
+    Vagon v2(2, 60, 55);
+    Vagon v3(3, 40, 35);
+
+    Train t1;
+    t1.AddLast(v1);
+    t1.AddLast(v2);
+    t1.AddFirst(v3);
+
+    t1.Show();
+
+    cout << endl;
+
+    Train t2(t1);
+    t2.Show();
+
+    return 0;
+}
