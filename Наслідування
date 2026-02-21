@@ -1,0 +1,196 @@
+#include <iostream>
+
+using namespace std;
+
+class Student
+
+{
+
+protected:
+
+    string name;
+
+    int age;
+
+    string university;
+
+public:
+
+    Student() : name("No name"), age(0), university("Unknown") {}
+
+    Student(string n, int a, string u)
+
+        : name(n), age(a), university(u) {
+
+    }
+
+    void Print() const
+
+    {
+
+        cout << "Name: " << name << endl;
+
+        cout << "Age: " << age << endl;
+
+        cout << "University: " << university << endl;
+
+    }
+
+};
+
+class Aspirant : public Student
+
+{
+
+    string dissertationTopic;
+
+public:
+
+    Aspirant() : Student(), dissertationTopic("No topic") {}
+
+    Aspirant(string n, int a, string u, string topic)
+
+        : Student(n, a, u), dissertationTopic(topic) {
+
+    }
+
+    void Print() const
+
+    {
+
+        cout << "----- Aspirant -----" << endl;
+
+        Student::Print();
+
+        cout << "Dissertation topic: " << dissertationTopic << endl;
+
+    }
+
+};
+
+
+class Passport
+
+{
+
+protected:
+
+    string fullName;
+
+    string birthDate;
+
+    string passportNumber;
+
+    string issuedBy;
+
+public:
+
+    Passport()
+
+        : fullName("No name"), birthDate("Unknown"),
+
+        passportNumber("000000"), issuedBy("Unknown") {
+
+    }
+
+    Passport(string name, string date, string number, string issuer)
+
+        : fullName(name), birthDate(date),
+
+        passportNumber(number), issuedBy(issuer) {
+
+    }
+
+    void Print() const
+
+    {
+
+        cout << "----- Passport (UA) -----" << endl;
+
+        cout << "Full name: " << fullName << endl;
+
+        cout << "Birth date: " << birthDate << endl;
+
+        cout << "Passport number: " << passportNumber << endl;
+
+        cout << "Issued by: " << issuedBy << endl;
+
+    }
+
+};
+
+class ForeignPassport : public Passport
+
+{
+
+    string foreignPassportNumber;
+
+    string visas;
+
+public:
+
+    ForeignPassport()
+
+        : Passport(), foreignPassportNumber("No number"), visas("No visas") {
+
+    }
+
+    ForeignPassport(string name, string date, string number, string issuer,
+
+        string foreignNumber, string visaInfo)
+
+        : Passport(name, date, number, issuer),
+
+        foreignPassportNumber(foreignNumber), visas(visaInfo) {
+
+    }
+
+    void Print() const
+
+    {
+
+        cout << "----- Foreign Passport -----" << endl;
+
+        Passport::Print();
+
+        cout << "Foreign passport number: " << foreignPassportNumber << endl;
+
+        cout << "Visas: " << visas << endl;
+
+    }
+
+};
+
+int main()
+
+{
+
+    Student st("Kostya Duda", 20, "KPI");
+
+    st.Print();
+
+    cout << endl;
+
+    Aspirant asp("bakshyn nikita", 25, "KNU", "Artificial Intelligence");
+
+    asp.Print();
+
+    Passport p("Kostya Duda", "01.01.2012", "AA123456", "Kyiv Authority");
+
+    p.Print();
+
+    cout << endl;
+
+    ForeignPassport fp("bakshyn nikita", "05.03.2009", "BB654321",
+
+        "Lviv Authority",
+
+        "FP987654",
+
+        "Poland, Germany");
+
+    fp.Print();
+
+    return 0;
+
+}
