@@ -1,0 +1,136 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Animal {
+protected:
+    string species;
+    double speed;
+    double weight;
+    string habitat;
+
+public:
+    Animal(string s, double sp, double w, string h)
+        : species(s), speed(sp), weight(w), habitat(h) {}
+
+    virtual void Move() {
+        cout << "Animal moves" << endl;
+    }
+
+    virtual void Say() {
+        cout << "Animal makes a sound" << endl;
+    }
+
+    virtual void Show() {
+        cout << "Species: " << species << endl;
+        cout << "Speed: " << speed << " km/h" << endl;
+        cout << "Weight: " << weight << " kg" << endl;
+        cout << "Habitat: " << habitat << endl;
+    }
+
+    virtual ~Animal() {}
+};
+
+class Bird : public Animal {
+protected:
+    double wingspan;
+
+public:
+    Bird(string s, double sp, double w, string h, double ws)
+        : Animal(s, sp, w, h), wingspan(ws) {}
+
+    void Move() override {
+        cout << "Bird flies" << endl;
+    }
+
+    void Show() override {
+        Animal::Show();
+        cout << "Wingspan: " << wingspan << " m" << endl;
+    }
+};
+
+class Reptile : public Animal {
+protected:
+    bool venomous;
+
+public:
+    Reptile(string s, double sp, double w, string h, bool v)
+        : Animal(s, sp, w, h), venomous(v) {}
+
+    void Move() override {
+        cout << "Reptile crawls" << endl;
+    }
+
+    void Show() override {
+        Animal::Show();
+        cout << "Venomous: " << (venomous ? "Yes" : "No") << endl;
+    }
+};
+
+class Fish : public Animal {
+protected:
+    double depth;
+
+public:
+    Fish(string s, double sp, double w, string h, double d)
+        : Animal(s, sp, w, h), depth(d) {}
+
+    void Move() override {
+        cout << "Fish swims" << endl;
+    }
+
+    void Show() override {
+        Animal::Show();
+        cout << "Swimming depth: " << depth << " m" << endl;
+    }
+};
+
+class Eagle : public Bird {
+public:
+    Eagle() : Bird("Eagle", 160, 6, "Mountains", 2.3) {}
+
+    void Say() override {
+        cout << "Eagle screeches" << endl;
+    }
+};
+
+class Snake : public Reptile {
+public:
+    Snake() : Reptile("Snake", 12, 4, "Desert", true) {}
+
+    void Say() override {
+        cout << "Snake hisses" << endl;
+    }
+};
+
+class Shark : public Fish {
+public:
+    Shark() : Fish("Shark", 50, 800, "Ocean", 2000) {}
+
+    void Say() override {
+        cout << "Shark is silent" << endl;
+    }
+};
+
+int main() {
+    Eagle eagle;
+    Snake snake;
+    Shark shark;
+
+    eagle.Show();
+    eagle.Move();
+    eagle.Say();
+    cout << endl;
+
+    snake.Show();
+    snake.Move();
+    snake.Say();
+    cout << endl;
+
+    shark.Show();
+    shark.Move();
+    shark.Say();
+
+    return 0;
+}
