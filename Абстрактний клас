@@ -1,0 +1,94 @@
+#include <iostream>
+using namespace std;
+
+class Animal {
+protected:
+    string habitat;
+    int age;
+public:
+    Animal(string h, int a) {
+        habitat = h;
+        age = a;
+    }
+    virtual void grow() {
+        age++;
+    }
+    int getAge() {
+        return age;
+    }
+};
+
+class Rabbit : public Animal {
+public:
+    Rabbit(string h, int a) : Animal(h,a) {}
+    bool isDead() {
+        return age > 5;
+    }
+};
+
+class Fox : public Animal {
+public:
+    Fox(string h, int a) : Animal(h,a) {}
+    bool isDead() {
+        return age > 10;
+    }
+};
+
+class Plant {
+protected:
+    int amount;
+public:
+    Plant(int a) {
+        amount = a;
+    }
+    int getAmount() {
+        return amount;
+    }
+    void eat(int n) {
+        amount -= n;
+        if(amount < 0) amount = 0;
+    }
+};
+
+class Grass : public Plant {
+public:
+    Grass(int a) : Plant(a) {}
+};
+
+class Life {
+private:
+    int rabbits;
+    int foxes;
+    Grass grass;
+public:
+    Life(int r, int f, int g) : grass(g) {
+        rabbits = r;
+        foxes = f;
+    }
+
+    void interact() {
+        if(grass.getAmount() > rabbits)
+            cout << "Трава залишилась\n";
+        else {
+            grass.eat(rabbits);
+            cout << "Трава з'їдена\n";
+        }
+
+        if(rabbits < foxes && rabbits > 0) {
+            rabbits--;
+            cout << "Лисиця з'їла кролика\n";
+        }
+
+        if(foxes > 5)
+            cout << "Лисиці більше не з'являються\n";
+
+        cout << "Кроликів: " << rabbits << endl;
+        cout << "Лисиць: " << foxes << endl;
+        cout << "Трави: " << grass.getAmount() << endl;
+    }
+};
+
+int main() {
+    Life world(4, 3, 10);
+    world.interact();
+}
