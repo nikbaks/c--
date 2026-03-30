@@ -1,0 +1,117 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Wheel {
+private:
+    int radius;
+public:
+    Wheel(int r = 16) : radius(r) {}
+    int getRadius() const { return radius; }
+    void rotate() const {
+        cout << "Wheel R" << radius << " rotating." << endl;
+    }
+};
+
+class Engine {
+private:
+    int power;
+public:
+    Engine(int p = 0) : power(p) {}
+    int getPower() const { return power; }
+    void start() const {
+        cout << "Engine: " << power << " hp started." << endl;
+    }
+};
+
+class Car {
+private:
+    string brand;
+    Engine engine;
+    vector<Wheel*> wheels;
+    double mileage;
+
+public:
+    Car(string b = "", int p = 0) : brand(b), engine(p), mileage(0.0) {}
+
+    ~Car() {
+        for (auto w : wheels) delete w;
+        wheels.clear();
+    }
+
+    void installWheel(Wheel* w) {
+        if (wheels.size() < 4) {
+            wheels.push_back(w);
+        }
+    }
+
+    Car& operator+=(double km) {
+        this->mileage += km;
+        return *this;
+    }
+
+    friend fstream& operator<<(fstream& fs, const Car& car) {
+        fs << car.brand << endl;
+        fs << car.engine.getPower() << endl;
+        fs << car.mileage << endl;
+        fs << car.wheels.size() << endl;
+        for (const auto w : car.wheels) {
+            fs << w->getRadius() << endl;
+        }
+        return fs;
+    }
+
+    friend fstream& operator>>(fstream& fs, Car& car) {
+        for (auto w : car.wheels) delete w;
+        car.wheels.clear();
+
+        getline(fs >> ws, car.brand);
+        int p;
+        fs >> p;
+        car.engine = Engine(p);
+        fs >> car.mileage;
+
+        size_t wheelCount;
+        fs >> wheelCount;
+        for (size_t i = 0; i < wheelCount; ++i) {
+            int r;
+            fs >> r;
+            car.wheels.push_back(new Wheel(r));
+        }
+        return fs;
+    }
+
+    void display() const {
+        cout << "Brand: " << brand << " | Power: " << engine.getPower() 
+             << " hp | Mileage: " << mileage << " km | Wheels: " << wheels.size() << endl;
+    }
+};
+
+int main() {
+    Car myCar("BMW", 300);
+    myCar.installWheel(new Wheel(18));
+    myCar.installWheel(new Wheel(18));
+    myCar.installWheel(new Wheel(18));
+    myCar.installWheel(new Wheel(18));
+    myCar += 120.5;
+
+    fstream outFile("car_data.txt", ios::out);
+    if (outFile.is_open()) {
+        outFile << myCar;
+        outFile.close();
+    }
+
+    Car loadedCar;
+    fstream inFile("car_data.txt", ios::in);
+    if (inFile.is_open()) {
+        inFile >> loadedCar;
+        inFile.close();
+    }
+
+    loadedCar.display();
+
+    return 0;
+}
