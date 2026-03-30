@@ -1,0 +1,80 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+struct Point {
+    int x, y;
+};
+
+class Engine {
+private:
+    int power;
+public:
+    Engine(int p = 0) : power(p) {}
+    void start() const {
+        cout << "Engine: " << power << " hp started." << endl;
+    }
+};
+
+class Wheel {
+private:
+    int radius;
+public:
+    Wheel(int r = 16) : radius(r) {}
+    void rotate() const {
+        cout << "Wheel R" << radius << " rotating." << endl;
+    }
+};
+
+class Car {
+private:
+    string brand;
+    Engine engine;
+    vector<Wheel*> wheels;
+    double mileage;
+
+public:
+    Car(string b, int p) : brand(b), engine(p), mileage(0.0) {}
+
+    void installWheel(Wheel* w) {
+        if (wheels.size() < 4) {
+            wheels.push_back(w);
+        }
+    }
+
+    Car& operator+=(double km) {
+        this->mileage += km;
+        return *this;
+    }
+
+    friend ostream& operator<<(ostream& os, const Car& car) {
+        os << "Car: " << car.brand << " | Mileage: " << car.mileage << " km";
+        return os;
+    }
+
+    void drive() {
+        if (wheels.size() < 4) return;
+        engine.start();
+        for (auto w : wheels) {
+            w->rotate();
+        }
+    }
+};
+
+int main() {
+    Wheel w1(17), w2(17), w3(17), w4(17);
+    Car myCar("Audi", 250);
+
+    myCar.installWheel(&w1);
+    myCar.installWheel(&w2);
+    myCar.installWheel(&w3);
+    myCar.installWheel(&w4);
+
+    myCar += 25.5;
+    myCar.drive();
+    cout << myCar << endl;
+
+    return 0;
+}
