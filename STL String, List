@@ -1,0 +1,138 @@
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
+
+class Dictionary {
+private:
+    map<string, vector<string>> words;
+
+public:
+    void addWord(string word, vector<string> translations) {
+        words[word] = translations;
+    }
+
+    void addTranslation(string word, string translation) {
+        if (words.count(word)) {
+            words[word].push_back(translation);
+        } else {
+            cout << "Слово не знайдено!" << endl;
+        }
+    }
+
+    void findTranslations(string word) const {
+        if (words.count(word)) {
+            cout << "Переклади для '" << word << "': ";
+            for (const auto& t : words.at(word)) {
+                cout << t << " ";
+            }
+            cout << endl;
+        } else {
+            cout << "Слово не знайдено." << endl;
+        }
+    }
+
+    void deleteWord(string word) {
+        if (words.erase(word)) {
+            cout << "Слово видалено." << endl;
+        } else {
+            cout << "Слово не знайдено." << endl;
+        }
+    }
+
+    void showAll() const {
+        if (words.empty()) {
+            cout << "Словник порожній." << endl;
+            return;
+        }
+        for (const auto& pair : words) {
+            cout << pair.first << " - ";
+            for (size_t i = 0; i < pair.second.size(); ++i) {
+                cout << pair.second[i] << (i == pair.second.size() - 1 ? "" : ", ");
+            }
+            cout << endl;
+        }
+    }
+
+    void saveToFile(string filename) {
+        ofstream out(filename);
+        if (!out) return;
+        for (const auto& pair : words) {
+            out << pair.first << ":";
+            for (size_t i = 0; i < pair.second.size(); ++i) {
+                out << pair.second[i] << (i == pair.second.size() - 1 ? "" : ",");
+            }
+            out << endl;
+        }
+        out.close();
+    }
+
+    void loadFromFile(string filename) {
+        ifstream in(filename);
+        if (!in) return;
+        words.clear();
+        string line;
+        while (getline(in, line)) {
+            size_t pos = line.find(':');
+            if (pos != string::npos) {
+                string word = line.substr(0, pos);
+                string transStr = line.substr(pos + 1);
+                stringstream ss(transStr);
+                string t;
+                vector<string> trans;
+                while (getline(ss, t, ',')) {
+                    trans.push_back(t);
+                }
+                words[word] = trans;
+            }
+        }
+        in.close();
+    }
+};
+
+int main() {
+    Dictionary dict;
+    dict.loadFromFile("dict.txt");
+    int choice;
+    string word, trans;
+
+    do {
+        cout << "\n1. Додати слово\n2. Знайти переклади\n3. Додати переклад до слова\n"
+             << "4. Видалити слово\n5. Показати все\n6. Зберегти\n0. Вихід\nВаш вибір: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Введіть слово: "; cin >> word;
+            cout << "Введіть переклад: "; cin >> trans;
+            dict.addWord(word, {trans});
+            break;
+        case 2:
+            cout << "Яке слово шукати: "; cin >> word;
+            dict.findTranslations(word);
+            break;
+        case 3:
+            cout << "Слово: "; cin >> word;
+            cout << "Новий переклад: "; cin >> trans;
+            dict.addTranslation(word, trans);
+            break;
+        case 4:
+            cout << "Слово для видалення: "; cin >> word;
+            dict.deleteWord(word);
+            break;
+        case 5:
+            dict.showAll();
+            break;
+        case 6:
+            dict.saveToFile("dict.txt");
+            cout << "Збережено." << endl;
+            break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
