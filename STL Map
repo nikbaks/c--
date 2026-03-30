@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <list>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+struct Point {
+    int x, y;
+};
+
+class Figure {
+private:
+    vector<Point> cells; 
+    int color;
+
+public:
+    Figure(int c) : color(c) {}
+
+    void addPoint(int x, int y) {
+        cells.push_back({x, y});
+    }
+
+    void move(int dx, int dy) {
+        for (auto& p : cells) {
+            p.x += dx;
+            p.y += dy;
+        }
+    }
+
+    void show() const {
+        cout << "Figure (color " << color << "): ";
+        for (const auto& p : cells) {
+            cout << "(" << p.x << "," << p.y << ") ";
+        }
+        cout << endl;
+    }
+};
+
+class GameSession {
+private:
+    list<string> actionHistory; 
+    vector<Figure*> activeFigures;
+
+public:
+    ~GameSession() {
+        for (auto f : activeFigures) delete f;
+        activeFigures.clear();
+    }
+
+    void spawnFigure(Figure* f) {
+        activeFigures.push_back(f);
+        actionHistory.push_back("Spawned new figure");
+    }
+
+    void logAction(string action) {
+        actionHistory.push_back(action);
+        if (actionHistory.size() > 5) {
+            actionHistory.pop_front(); 
+        }
+    }
+
+    void showStatus() const {
+        cout << "--- Current session log ---" << endl;
+        for (const auto& log : actionHistory) {
+            cout << " > " << log << endl;
+        }
+        cout << "Total figures: " << activeFigures.size() << endl;
+    }
+};
+
+int main() {
+    GameSession session;
+
+    Figure* f1 = new Figure(1);
+    f1->addPoint(0, 0);
+    f1->addPoint(0, 1);
+    f1->addPoint(1, 1);
+
+    session.spawnFigure(f1);
+    session.logAction("Move Left");
+    session.logAction("Rotate");
+    session.logAction("Move Down");
+
+    session.showStatus();
+
+    return 0;
+}
