@@ -1,0 +1,122 @@
+import { BrowserRouter, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+
+const schools = [
+  "Школа №1", "Школа №2", "Школа №7", "Школа №12", "Школа №15",
+  "Школа №18", "Школа №22", "Школа №25", "Школа №28", "Гуманітарна гімназія"
+];
+
+const SchoolsList = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+
+  const lastIndex = currentPage * itemsPerPage;
+  const firstIndex = lastIndex - itemsPerPage;
+  const currentSchools = schools.slice(firstIndex, lastIndex);
+  const totalPages = Math.ceil(schools.length / itemsPerPage);
+
+  return (
+    <div>
+      <h2>Школи міста Рівне</h2>
+      <ul>
+        {currentSchools.map((school, index) => (
+          <li key={index}>{school}</li>
+        ))}
+      </ul>
+      <div>
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button 
+            key={i + 1} 
+            onClick={() => setCurrentPage(i + 1)}
+            style={{ fontWeight: currentPage === i + 1 ? 'bold' : 'normal', margin: '2px' }}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+      <br />
+      <Link to="/">Назад</Link>
+    </div>
+  );
+};
+
+const CityHome = () => {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query) navigate(`/city/landmark/${query}`);
+  };
+
+  return (
+    <nav>
+      <h1>Моє Місто</h1>
+      <Link to="/city/about">Про місто</Link> | 
+      <Link to="/city/list">Інші пам'ятки</Link> | 
+      <Link to="/city/photos">Фото</Link> | 
+      <Link to="/city/schools">Школи</Link>
+      <form onSubmit={handleSubmit} style={{ marginTop: '10px' }}>
+        <input 
+          type="text" 
+          placeholder="Пошук пам'ятки..." 
+          value={query} 
+          onChange={(e) => setQuery(e.target.value)} 
+        />
+        <button type="submit">Перейти</button>
+      </form>
+    </nav>
+  );
+};
+
+const ShakespeareHome = () => {
+  const [work, setWork] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (work) navigate(`/shakespeare/works/${work}`);
+  };
+
+  return (
+    <nav>
+      <h1>Шекспір</h1>
+      <Link to="/shakespeare/bio">Поет</Link> | 
+      <Link to="/shakespeare/globe">Глобус</Link>
+      <form onSubmit={handleSubmit} style={{ marginTop: '10px' }}>
+        <input 
+          type="text" 
+          placeholder="Введіть назву твору..." 
+          value={work} 
+          onChange={(e) => setWork(e.target.value)} 
+        />
+        <button type="submit">Відкрити</button>
+      </form>
+    </nav>
+  );
+};
+
+const Info = ({ text }) => <div><h2>{text}</h2><Link to="/">Назад</Link></div>;
+
+const Details = () => {
+  const { param } = useParams();
+  return <div><h2>Результат: {param}</h2><Link to="/">Назад</Link></div>;
+};
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<div><CityHome /><hr /><ShakespeareHome /></div>} />
+        <Route path="/city/about" element={<Info text="Інформація про місто" />} />
+        <Route path="/city/landmark/:param" element={<Details />} />
+        <Route path="/city/list" element={<Info text="Список пам'яток" />} />
+        <Route path="/city/photos" element={<Info text="Фотографії" />} />
+        <Route path="/city/schools" element={<SchoolsList />} />
+        <Route path="/shakespeare/bio" element={<Info text="Про Шекспіра" />} />
+        <Route path="/shakespeare/works/:param" element={<Details />} />
+        <Route path="/shakespeare/globe" element={<Info text="Театр Глобус" />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
