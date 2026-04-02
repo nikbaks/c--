@@ -1,0 +1,123 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <algorithm>
+#include <iomanip>
+
+using namespace std;
+
+struct Time {
+    short h, m, s; [cite: 23]
+};
+
+class Train {
+private:
+    int number; [cite: 29]
+    Time departureTime; [cite: 30]
+    string destination; [cite: 31]
+
+public:
+    Train() : number(0), departureTime({0, 0, 0}), destination("") {}
+
+    int getNumber() const { return number; } [cite: 13]
+    string getDestination() const { return destination; }
+    
+    void setDepartureTime(short h, short m, short s) {
+        departureTime = {h, m, s}; [cite: 14]
+    }
+
+    bool operator<(const Train& other) const {
+        if (departureTime.h != other.departureTime.h) return departureTime.h < other.departureTime.h;
+        if (departureTime.m != other.departureTime.m) return departureTime.m < other.departureTime.m;
+        return departureTime.s < other.departureTime.s; [cite: 15]
+    }
+
+    friend ostream& operator<<(ostream& os, const Train& t) {
+        os << t.number << " " 
+           << setfill('0') << setw(2) << t.departureTime.h << ":" 
+           << setw(2) << t.departureTime.m << ":" 
+           << setw(2) << t.departureTime.s << " " 
+           << t.destination; [cite: 19]
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, Train& t) {
+        char sep;
+        is >> t.number >> t.departureTime.h >> sep >> t.departureTime.m >> sep >> t.departureTime.s >> t.destination; [cite: 19]
+        return is;
+    }
+
+    void saveToFile(ofstream& ofs) const {
+        ofs << number << " " << departureTime.h << " " << departureTime.m << " " << departureTime.s << " " << destination << endl;
+    }
+
+    void loadFromFile(ifstream& ifs) {
+        ifs >> number >> departureTime.h >> departureTime.m >> departureTime.s >> destination;
+    }
+};
+
+class Railway {
+    vector<Train> trains; [cite: 38]
+
+public:
+    void addTrain() {
+        Train t;
+        cout << "Введіть номер, час (г х с) та станцію: ";
+        cin >> t;
+        trains.push_back(t); [cite: 10]
+    }
+
+    void printAll() const {
+        for (const auto& t : trains) cout << t << endl; [cite: 11]
+    }
+
+    void findByNumber(int num) const {
+        for (const auto& t : trains) {
+            if (t.getNumber() == num) { [cite: 13]
+                cout << t << endl; [cite: 12]
+                return;
+            }
+        }
+        cout << "Потяг не знайдено." << endl;
+    }
+
+    void editTime(int num) {
+        for (auto& t : trains) {
+            if (t.getNumber() == num) {
+                short h, m, s;
+                cout << "Новий час (г х с): ";
+                cin >> h >> m >> s;
+                t.setDepartureTime(h, m, s); [cite: 14]
+                return;
+            }
+        }
+    }
+
+    void sortByTime() {
+        sort(trains.begin(), trains.end()); [cite: 15]
+    }
+
+    void showByDestination(string dest) const {
+        for (const auto& t : trains) {
+            if (t.getDestination() == dest) cout << t << endl; [cite: 16]
+        }
+    }
+
+    void save(string filename) {
+        ofstream ofs(filename);
+        for (const auto& t : trains) t.saveToFile(ofs); [cite: 17]
+    }
+
+    void load(string filename) {
+        ifstream ifs(filename);
+        trains.clear();
+        Train t;
+        while (ifs >> t) trains.push_back(t); [cite: 18]
+    }
+};
+
+int main() {
+    Railway station;
+    return 0;
+}
