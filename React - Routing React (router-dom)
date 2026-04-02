@@ -1,0 +1,44 @@
+import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
+
+const CityHome = () => (
+  <nav>
+    <h1>Моє Місто</h1>
+    <Link to="/city/about">Про місто</Link> | 
+    <Link to="/city/landmark/castle">Головна пам'ятка</Link> | 
+    <Link to="/city/list">Інші пам'ятки</Link> | 
+    <Link to="/city/photos">Фото</Link>
+  </nav>
+);
+
+const ShakespeareHome = () => (
+  <nav>
+    <h1>Шекспір</h1>
+    <Link to="/shakespeare/bio">Поет</Link> | 
+    <Link to="/shakespeare/works/hamlet">Твори</Link> | 
+    <Link to="/shakespeare/globe">Глобус</Link>
+  </nav>
+);
+
+const Info = ({ text }) => <div><h2>{text}</h2><Link to="/">Назад</Link></div>;
+
+const Details = () => {
+  const { param } = useParams();
+  return <div><h2>Параметр: {param}</h2><Link to="/">Назад</Link></div>;
+};
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<div><CityHome /><hr /><ShakespeareHome /></div>} />
+        <Route path="/city/about" element={<Info text="Інформація про місто" />} />
+        <Route path="/city/landmark/:param" element={<Details />} />
+        <Route path="/city/list" element={<Info text="Список пам'яток" />} />
+        <Route path="/city/photos" element={<Info text="Фотографії" />} />
+        <Route path="/shakespeare/bio" element={<Info text="Про Шекспіра" />} />
+        <Route path="/shakespeare/works/:param" element={<Details />} />
+        <Route path="/shakespeare/globe" element={<Info text="Театр Глобус" />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
