@@ -1,0 +1,99 @@
+import React, { createContext, useContext, useState } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+const CartContext = createContext();
+
+const schools = [
+  "Школа №1", "Школа №2", "Школа №7", "Школа №12", "Школа №15",
+  "Школа №18", "Школа №22", "Школа №25", "Школа №28", "Гуманітарна гімназія"
+];
+
+const productsData = [
+  { id: 1, name: "Ноутбук", price: 25000 },
+  { id: 2, name: "Мишка", price: 500 },
+  { id: 3, name: "Клавіатура", price: 1200 }
+];
+
+export const CartProvider = ({ children }) => {
+  const [cart, setCart] = useState([]);
+
+  const addToCart = (product) => setCart([...cart, product]);
+  const removeFromCart = (productId) => {
+    const index = cart.findIndex(item => item.id === productId);
+    if (index !== -1) {
+      const newCart = [...cart];
+      newCart.splice(index, 1);
+      setCart(newCart);
+    }
+  };
+
+  return (
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, schoolsCount: schools.length }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+const Header = () => {
+  const { cart, schoolsCount } = useContext(CartContext);
+  return (
+    <header style={{ borderBottom: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
+      <nav>
+        <Link to="/">Товари</Link> | <Link to="/cart">Корзина ({cart.length})</Link>
+      </nav>
+      <p style={{ fontSize: '0.8em', color: '#666' }}>Шкіл у Рівному: {schoolsCount}</p>
+    </header>
+  );
+};
+
+const ProductList = () => {
+  const { addToCart } = useContext(CartContext);
+  return (
+    <div>
+      <h2>Список товарів</h2>
+      <div style={{ display: 'flex', gap: '20px' }}>
+        {productsData.map(product => (
+          <div key={product.id} style={{ border: '1px solid black', padding: '10px' }}>
+            <h3>{product.name}</h3>
+            <p>Ціна: {product.price} грн</p>
+            <button onClick={() => addToCart(product)}>Додати в корзину</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CartPage = () => {
+  const { cart, removeFromCart } = useContext(CartContext);
+  return (
+    <div>
+      <h2>Ваша корзина</h2>
+      {cart.length === 0 ? <p>Корзина порожня</p> : (
+        <ul>
+          {cart.map((item, index) => (
+            <li key={index}>
+              {item.name} - {item.price} грн 
+              <button onClick={() => removeFromCart(item.id)} style={{ marginLeft: '10px' }}>Видалити</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Link to="/">Повернутись до покупок</Link>
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <CartProvider>
+      <BrowserRouter>
+        <Header />
+        <Routes>
+          <Route path="/" element={<ProductList />} />
+          <Route path="/cart" element={<CartPage />} />
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
+  );
+}
