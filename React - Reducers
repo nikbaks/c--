@@ -1,0 +1,117 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+
+const TicTacToe = () => {
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState(true); // Ви граєте за X
+  const [winner, setWinner] = useState(null);
+
+  // Перевірка переможця
+  const calculateWinner = (squares) => {
+    const lines = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Рядки
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Стовпці
+      [0, 4, 8], [2, 4, 6],             // Діагоналі
+    ];
+    for (let line of lines) {
+      const [a, b, c] = line;
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a];
+      }
+    }
+    return squares.includes(null) ? null : 'Нічия';
+  };
+
+  // Хід комп'ютера
+  useEffect(() => {
+    if (!isXNext && !winner) {
+      const timer = setTimeout(() => {
+        makeComputerMove();
+      }, 500); // Невелика затримка для реалістичності
+      return () => clearTimeout(timer);
+    }
+  }, [isXNext, winner]);
+
+  const makeComputerMove = () => {
+    const emptyIndices = board.map((v, i) => (v === null ? i : null)).filter((v) => v !== null);
+    
+    // 1. Спроба перемогти або заблокувати гравця
+    let move = findBestMove(board, 'O') || findBestMove(board, 'X');
+    
+    // 2. Якщо немає критичних ходів — випадковий вибір
+    if (move === null) {
+      move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    }
+
+    if (move !== null) {
+      handleClick(move, false);
+    }
+  };
+
+  const findBestMove = (squares, player) => {
+    const lines = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6],
+    ];
+    for (let line of lines) {
+      const [a, b, c] = line;
+      const values = [squares[a], squares[b], squares[c]];
+      const playerCount = values.filter(v => v === player).length;
+      const nullCount = values.filter(v => v === null).length;
+      
+      if (playerCount === 2 && nullCount === 1) {
+        return line[values.indexOf(null)];
+      }
+    }
+    return null;
+  };
+
+  const handleClick = (index, isPlayer = true) => {
+    if (board[index] || winner || (isPlayer && !isXNext)) return;
+
+    const newBoard = [...board];
+    newBoard[index] = isXNext ? 'X' : 'O';
+    setBoard(newBoard);
+    
+    const gameResult = calculateWinner(newBoard);
+    if (gameResult) {
+      setWinner(gameResult);
+    } else {
+      setIsXNext(!isXNext);
+    }
+  };
+
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setIsXNext(true);
+    setWinner(null);
+  };
+
+  return (
+    <div className="game">
+      <h1>Хрестики-Нулики</h1>
+      <div className="status">
+        {winner 
+          ? (winner === 'Нічия' ? 'Нічия!' : `Переміг: ${winner}`) 
+          : `Зараз ходить: ${isXNext ? 'Ви (X)' : 'Комп\'ютер (O)'}`}
+      </div>
+      
+      <div className="board">
+        {board.map((value, i) => (
+          <button key={i} className="square" onClick={() => handleClick(i)}>
+            {value}
+          </button>
+        ))}
+      </div>
+
+      {winner && (
+        <button className="reset-btn" onClick={resetGame}>
+          Грати знову
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default TicTacToe;
