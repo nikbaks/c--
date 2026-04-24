@@ -1,0 +1,102 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
+
+using namespace std;
+
+class GameObject {
+public:
+    string name;
+    char sign;
+    GameObject(string n, char s) : name(n), sign(s) {}
+    virtual void interact(int& hp, int& gold, int& wood) = 0;
+    virtual ~GameObject() {}
+};
+
+class Enemy : public GameObject {
+    int damage;
+public:
+    Enemy(string n, int d) : GameObject(n, 'E'), damage(d) {}
+    void interact(int& hp, int& gold, int& wood) override {
+        cout << "!!! Напад " << name << "! Втрачено " << damage << " HP." << endl;
+        hp -= damage;
+    }
+};
+
+class Resource : public GameObject {
+    int value;
+public:
+    Resource(string n, int v) : GameObject(n, 'G'), value(v) {}
+    void interact(int& hp, int& gold, int& wood) override {
+        cout << "+++ Знайдено " << name << ". Додано " << value << " золота." << endl;
+        gold += value;
+    }
+};
+
+class WoodResource : public GameObject {
+    int amount;
+public:
+    WoodResource(string n, int a) : GameObject(n, 'W'), amount(a) {}
+    void interact(int& hp, int& gold, int& wood) override {
+        cout << ">>> Ви зрубали " << name << ". Отримано " << amount << " одиниць дерева." << endl;
+        wood += amount;
+    }
+};
+
+class Potion : public GameObject {
+    int heal;
+public:
+    Potion() : GameObject("Зiлля", 'P'), heal(20) {}
+    void interact(int& hp, int& gold, int& wood) override {
+        cout << "--- Випили зiлля. Вiдновлено " << heal << " HP." << endl;
+        hp += heal;
+    }
+};
+
+int main() {
+    const int SIZE = 7;
+    int px = 0, py = 0, hp = 100, gold = 0, wood = 0;
+    
+    vector<vector<unique_ptr<GameObject>>> map(SIZE);
+    for(int i = 0; i < SIZE; ++i) map[i].resize(SIZE);
+
+    map[1][2] = make_unique<Resource>("Золота жила", 50);
+    map[3][3] = make_unique<Enemy>("Орк", 25);
+    map[2][5] = make_unique<Potion>();
+    map[4][4] = make_unique<WoodResource>("Дуб", 10);
+    map[0][5] = make_unique<WoodResource>("Кущ", 2);
+    map[5][1] = make_unique<Enemy>("Бос", 60);
+
+    while (hp > 0) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (i == py && j == px) cout << "H ";
+                else if (map[i][j]) cout << map[i][j]->sign << " ";
+                else cout << ". ";
+            }
+            cout << endl;
+        }
+
+        cout << "HP: " << hp << " | Gold: " << gold << " | Wood: " << wood << " | Рух (wasd): ";
+        char move;
+        cin >> move;
+
+        if (move == 'w' && py > 0) py--;
+        if (move == 's' && py < SIZE - 1) py++;
+        if (move == 'a' && px > 0) px--;
+        if (move == 'd' && px < SIZE - 1) px++;
+
+        if (map[py][px]) {
+            map[py][px]->interact(hp, gold, wood);
+            map[py][px] = nullptr; 
+        }
+
+        if (hp <= 0) cout << "Вас убили! Грi кiнець." << endl;
+        if (gold >= 100 && wood >= 20) {
+            cout << "Ви зібрали ресурси та перемогли!" << endl;
+            break;
+        }
+    }
+    return 0;
+}
