@@ -1,0 +1,169 @@
+import React, { useState, useEffect, useMemo } from 'react';
+
+const TaskTracker = () => {
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem('rpg-tasks');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('rpg-user');
+    return saved ? JSON.parse(saved) : { name: '', level: 1, xp: 0, isLoggedIn: false };
+  });
+
+  const [input, setInput] = useState('');
+  const [category, setCategory] = useState('Навчання');
+  const [priority, setPriority] = useState('Medium');
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    localStorage.setItem('rpg-tasks', JSON.stringify(tasks));
+    localStorage.setItem('rpg-user', JSON.stringify(user));
+  }, [tasks, user]);
+
+  const addExperience = (prio) => {
+    const reward = prio === 'High' ? 30 : prio === 'Medium' ? 20 : 10;
+    let newXp = user.xp + reward;
+    let newLevel = user.level;
+
+    if (newXp >= 100) {
+      newLevel++;
+      newXp -= 100;
+    }
+    setUser(prev => ({ ...prev, xp: newXp, level: newLevel }));
+  };
+
+  const addTask = (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const newTask = {
+      id: Date.now(),
+      text: input,
+      category,
+      priority,
+      completed: false,
+      date: new Date().toLocaleDateString()
+    };
+
+    setTasks([newTask, ...tasks]);
+    setInput('');
+  };
+
+  const toggleTask = (id) => {
+    setTasks(tasks.map(task => {
+      if (task.id === id && !task.completed) {
+        addExperience(task.priority);
+        return { ...task, completed: true };
+      }
+      return task;
+    }));
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(t => t.id !== id));
+  };
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(t => {
+      if (filter === 'active') return !t.completed;
+      if (filter === 'done') return t.completed;
+      return true;
+    });
+  }, [tasks, filter]);
+
+  if (!user.isLoggedIn) {
+    return (
+      <div style={styles.authContainer}>
+        <h1>⚔️ Task Tracker RPG</h1>
+        <input 
+          placeholder="Iм'я героя..." 
+          onChange={(e) => setInput(e.target.value)}
+          style={styles.input}
+        />
+        <button onClick={() => setUser({...user, name: input || 'Герой', isLoggedIn: true})} style={styles.button}>
+          Почати
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.statsCard}>
+        <h2>{user.name}</h2>
+        <p>Lvl: {user.level} | XP: {user.xp}/100</p>
+        <div style={styles.xpBarBackground}>
+          <div style={{...styles.xpBarFill, width: `${user.xp}%`}}></div>
+        </div>
+        <button onClick={() => setUser({...user, isLoggedIn: false})} style={styles.logoutBtn}>Вихiд</button>
+      </div>
+
+      <form onSubmit={addTask} style={styles.form}>
+        <input 
+          value={input} 
+          onChange={(e) => setInput(e.target.value)} 
+          placeholder="Новий квест..." 
+          style={styles.input}
+        />
+        <div style={styles.row}>
+          <select onChange={(e) => setCategory(e.target.value)} style={styles.select}>
+            <option>Навчання</option>
+            <option>Робота</option>
+            <option>Дiм</option>
+            <option>Спорт</option>
+          </select>
+          <select onChange={(e) => setPriority(e.target.value)} style={styles.select}>
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+          <button type="submit" style={styles.addBtn}>+</button>
+        </div>
+      </form>
+
+      <div style={styles.filterRow}>
+        <button onClick={() => setFilter('all')}>All</button>
+        <button onClick={() => setFilter('active')}>Active</button>
+        <button onClick={() => setFilter('done')}>Done</button>
+      </div>
+
+      <div>
+        {filteredTasks.map(task => (
+          <div key={task.id} style={{
+            ...styles.taskItem, 
+            opacity: task.completed ? 0.5 : 1,
+            borderLeft: `5px solid ${task.priority === 'High' ? '#e74c3c' : task.priority === 'Medium' ? '#f39c12' : '#2ecc71'}`
+          }}>
+            <div onClick={() => toggleTask(task.id)} style={{flex: 1}}>
+              <b style={{textDecoration: task.completed ? 'line-through' : 'none'}}>{task.text}</b>
+              <div style={{fontSize: '11px', color: '#7f8c8d'}}>
+                {task.category} | {task.date}
+              </div>
+            </div>
+            <button onClick={() => deleteTask(task.id)} style={styles.delBtn}>🗑</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const styles = {
+  container: { maxWidth: '450px', margin: '0 auto', fontFamily: 'sans-serif', padding: '20px' },
+  authContainer: { textAlign: 'center', paddingTop: '100px' },
+  statsCard: { background: '#34495e', color: 'white', padding: '15px', borderRadius: '8px', marginBottom: '20px' },
+  xpBarBackground: { width: '100%', height: '10px', background: '#bdc3c7', borderRadius: '5px' },
+  xpBarFill: { height: '100%', background: '#2ecc71', borderRadius: '5px', transition: '0.3s' },
+  form: { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' },
+  row: { display: 'flex', gap: '8px' },
+  input: { padding: '8px', borderRadius: '4px', border: '1px solid #ddd' },
+  select: { padding: '8px', flex: 1 },
+  addBtn: { padding: '8px 15px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px' },
+  taskItem: { display: 'flex', background: '#f9f9f9', padding: '12px', marginBottom: '8px', borderRadius: '4px', alignItems: 'center', cursor: 'pointer' },
+  filterRow: { display: 'flex', gap: '5px', marginBottom: '15px' },
+  delBtn: { background: 'none', border: 'none', color: '#e74c3c', fontSize: '16px', cursor: 'pointer' },
+  logoutBtn: { marginTop: '10px', fontSize: '11px' }
+};
+
+export default TaskTracker;
