@@ -1,0 +1,156 @@
+using System;
+using System.Diagnostics;
+using System.Windows.Forms;
+
+namespace TaskManagerApp
+{
+    public partial class Form1 : Form
+    {
+        Timer timer = new Timer();
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            dataGridView1.Columns.Add("Name", "Process Name");
+            dataGridView1.Columns.Add("Id", "PID");
+            dataGridView1.Columns.Add("StartTime", "Start Time");
+            dataGridView1.Columns.Add("Priority", "Priority");
+            dataGridView1.Columns.Add("Memory", "Memory (MB)");
+
+            comboBox1.Items.Add("1");
+            comboBox1.Items.Add("2");
+            comboBox1.Items.Add("5");
+            comboBox1.Items.Add("Pause");
+
+            comboBox1.SelectedIndex = 0;
+
+            timer.Interval = 1000;
+            timer.Tick += Timer_Tick;
+            timer.Start();
+
+            LoadProcesses();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            LoadProcesses();
+        }
+
+        private void LoadProcesses()
+        {
+            dataGridView1.Rows.Clear();
+
+            Process[] processes = Process.GetProcesses();
+
+            foreach (Process process in processes)
+            {
+                string startTime = "Access denied";
+                string priority = "Access denied";
+
+                try
+                {
+                    startTime = process.StartTime.ToString();
+                }
+                catch { }
+
+                try
+                {
+                    priority = process.PriorityClass.ToString();
+                }
+                catch { }
+
+                double memory = process.WorkingSet64 / 1024.0 / 1024.0;
+
+                dataGridView1.Rows.Add(
+                    process.ProcessName,
+                    process.Id,
+                    startTime,
+                    priority,
+                    memory.ToString("F2")
+                );
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string value = comboBox1.SelectedItem.ToString();
+
+            if (value == "Pause")
+            {
+                timer.Stop();
+            }
+            else
+            {
+                timer.Interval = int.Parse(value) * 1000;
+                timer.Start();
+            }
+        }
+
+        private void btnKill_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                int pid = Convert.ToInt32(
+                    dataGridView1.SelectedRows[0].Cells[1].Value
+                );
+
+                try
+                {
+                    Process process = Process.GetProcessById(pid);
+                    process.Kill();
+
+                    MessageBox.Show("Process terminated");
+                    LoadProcesses();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private void btnInfo_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                int pid = Convert.ToInt32(
+                    dataGridView1.SelectedRows[0].Cells[1].Value
+                );
+
+                try
+                {
+                    Process process = Process.GetProcessById(pid);
+
+                    string info =
+                        "Name: " + process.ProcessName + "\n" +
+                        "PID: " + process.Id + "\n" +
+                        "Threads: " + process.Threads.Count + "\n" +
+                        "Memory: " +
+                        (process.WorkingSet64 / 1024 / 1024) + " MB";
+
+                    MessageBox.Show(info);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(textBox1.Text);
+
+                MessageBox.Show("Process started");
+                LoadProcesses();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+    }
+}
