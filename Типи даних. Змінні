@@ -1,0 +1,91 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Task 1:");
+        Console.WriteLine("It's easy to win forgiveness for being wrong;");
+        Console.WriteLine("being right is what gets you into real trouble.");
+        Console.WriteLine("Bjarne Stroustrup");
+
+        Console.WriteLine("\n------------------\n");
+
+        Console.WriteLine("Task 2:");
+
+        int[] numbers = new int[5];
+
+        Console.WriteLine("Enter 5 numbers:");
+
+        for (int i = 0; i < 5; i++)
+        {
+            numbers[i] = Convert.ToInt32(Console.ReadLine());
+        }
+
+        int sum = 0;
+        int product = 1;
+        int max = numbers[0];
+        int min = numbers[0];
+
+        foreach (int num in numbers)
+        {
+            sum += num;
+            product *= num;
+
+            if (num > max)
+                max = num;
+
+            if (num < min)
+                min = num;
+        }
+
+        Console.WriteLine("Sum = " + sum);
+        Console.WriteLine("Product = " + product);
+        Console.WriteLine("Max = " + max);
+        Console.WriteLine("Min = " + min);
+
+        Console.WriteLine("\n------------------\n");
+
+        Console.WriteLine("Task 3:");
+
+        Console.Write("Enter a six-digit number: ");
+        int number = Convert.ToInt32(Console.ReadLine());
+
+        int reversed = 0;
+
+        while (number > 0)
+        {
+            reversed = reversed * 10 + number % 10;
+            number /= 10;
+        }
+
+        Console.WriteLine("Reversed number: " + reversed);
+
+        Console.WriteLine("\n------------------\n");
+
+        Console.WriteLine("Task 4:");
+
+        Console.Write("Enter start of range: ");
+        int start = Convert.ToInt32(Console.ReadLine());
+
+        Console.Write("Enter end of range: ");
+        int end = Convert.ToInt32(Console.ReadLine());
+
+        int a = 0;
+        int b = 1;
+
+        Console.WriteLine("Fibonacci numbers:");
+
+        while (a <= end)
+        {
+            if (a >= start)
+            {
+                Console.Write(a + " ");
+            }
+
+            int next = a + b;
+            a = b;
+            b = next;
+        }
+    }
+}
