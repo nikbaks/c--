@@ -1,0 +1,104 @@
+using System;
+
+namespace FreezerApp
+{
+    class Freezer
+    {
+        private string brand;
+        private int volume;
+        private double temperature;
+        private bool isOn;
+        private char energyClass;
+
+        public string Brand
+        {
+            get { return brand; }
+            set { brand = value; }
+        }
+
+        public int Volume
+        {
+            get { return volume; }
+            set { volume = value; }
+        }
+
+        public double Temperature
+        {
+            get { return temperature; }
+            set { temperature = value; }
+        }
+
+        public bool IsOn
+        {
+            get { return isOn; }
+            set { isOn = value; }
+        }
+
+        public char EnergyClass
+        {
+            get { return energyClass; }
+            set { energyClass = value; }
+        }
+
+        public Freezer()
+            : this("Samsung", 200, -18.5, true, 'A')
+        {
+        }
+
+        public Freezer(string brand, int volume)
+            : this(brand, volume, -18.5, true, 'A')
+        {
+        }
+
+        public Freezer(string brand, int volume, double temperature)
+            : this(brand, volume, temperature, true, 'A')
+        {
+        }
+
+        public Freezer(string brand, int volume, double temperature, bool isOn, char energyClass)
+        {
+            this.brand = brand;
+            this.volume = volume;
+            this.temperature = temperature;
+            this.isOn = isOn;
+            this.energyClass = energyClass;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine("Brand: " + brand);
+            Console.WriteLine("Volume: " + volume);
+            Console.WriteLine("Temperature: " + temperature);
+            Console.WriteLine("Power: " + isOn);
+            Console.WriteLine("Energy class: " + energyClass);
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Freezer freezer1 = new Freezer();
+
+            Freezer freezer2 = new Freezer("LG", 300);
+
+            Freezer freezer3 = new Freezer("Bosch", 250, -22);
+
+            Freezer freezer4 = new Freezer("Beko", 180, -20, false, 'B');
+
+            freezer1.ShowInfo();
+
+            Console.WriteLine();
+
+            freezer2.ShowInfo();
+
+            Console.WriteLine();
+
+            freezer3.ShowInfo();
+
+            Console.WriteLine();
+
+            freezer4.ShowInfo();
+        }
+    }
+}
