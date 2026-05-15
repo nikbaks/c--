@@ -1,0 +1,138 @@
+using System;
+using System.Text;
+using System.Linq;
+
+namespace StringsTasks
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string str1 = "Hello world!";
+            string insertStr = " beautiful";
+            int position = 5;
+
+            string result1 = str1.Insert(position, insertStr);
+
+            Console.WriteLine("TASK 1");
+            Console.WriteLine(result1);
+
+            Console.WriteLine();
+
+            Console.WriteLine("TASK 2");
+
+            Console.Write("Enter word: ");
+            string palindrome = Console.ReadLine();
+
+            string reversed = new string(palindrome.Reverse().ToArray());
+
+            if (palindrome.ToLower() == reversed.ToLower())
+                Console.WriteLine("Palindrome");
+            else
+                Console.WriteLine("Not palindrome");
+
+            Console.WriteLine();
+
+            Console.WriteLine("TASK 3");
+
+            Console.Write("Enter text: ");
+            string text = Console.ReadLine();
+
+            int lower = 0;
+            int upper = 0;
+
+            foreach (char c in text)
+            {
+                if (char.IsLower(c))
+                    lower++;
+
+                if (char.IsUpper(c))
+                    upper++;
+            }
+
+            double lowerPercent = (double)lower / text.Length * 100;
+            double upperPercent = (double)upper / text.Length * 100;
+
+            Console.WriteLine($"Lowercase: {lowerPercent:F2}%");
+            Console.WriteLine($"Uppercase: {upperPercent:F2}%");
+
+            Console.WriteLine();
+
+            Console.WriteLine("TASK 4");
+
+            string[] words = { "computer", "mouse", "keyboard", "phone", "screen" };
+
+            int selectedLength = 5;
+
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length == selectedLength)
+                {
+                    words[i] = words[i].Remove(words[i].Length - 3) + "$$$";
+                }
+            }
+
+            foreach (string word in words)
+            {
+                Console.WriteLine(word);
+            }
+
+            Console.WriteLine();
+
+            Console.WriteLine("TASK 5");
+
+            string sentence = "CSharp is powerful and easy language";
+
+            string[] splitWords = sentence.Split(' ');
+
+            Console.Write("Enter word number: ");
+            int number = int.Parse(Console.ReadLine());
+
+            if (number > 0 && number <= splitWords.Length)
+            {
+                string foundWord = splitWords[number - 1];
+
+                Console.WriteLine(foundWord[0]);
+            }
+            else
+            {
+                Console.WriteLine("Invalid number");
+            }
+
+            Console.WriteLine();
+
+            Console.WriteLine("TASK 6");
+
+            string messyString = "   Hello    world   this   is   CSharp   ";
+
+            string cleaned =
+                string.Join("*",
+                messyString
+                .Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+
+            Console.WriteLine(cleaned);
+
+            Console.WriteLine();
+
+            Console.WriteLine("TASK 7");
+
+            StringBuilder sb = new StringBuilder();
+
+            while (true)
+            {
+                Console.Write("Enter word: ");
+                string input = Console.ReadLine();
+
+                if (sb.Length > 0)
+                    sb.Append(", ");
+
+                sb.Append(input);
+
+                if (input.EndsWith("."))
+                    break;
+            }
+
+            Console.WriteLine(sb.ToString());
+        }
+    }
+}
