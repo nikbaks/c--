@@ -1,0 +1,83 @@
+using System;
+ 
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+ 
+            Console.Write("Введіть число: ");
+            string numberInput = Console.ReadLine();
+ 
+            int number = StringToInt(numberInput);
+ 
+            Console.WriteLine("Перетворене число: " + number);
+ 
+            Console.Write("\nВведіть математичний вираз (*): ");
+            string expression = Console.ReadLine();
+ 
+            int result = CalculateExpression(expression);
+ 
+            Console.WriteLine("Результат виразу: " + result);
+        }
+        catch (FormatException ex)
+        {
+            Console.WriteLine("Помилка формату: " + ex.Message);
+        }
+        catch (OverflowException ex)
+        {
+            Console.WriteLine("Помилка переповнення: " + ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Інша помилка: " + ex.Message);
+        }
+    }
+ 
+ 
+    static int StringToInt(string str)
+    {
+        if (string.IsNullOrWhiteSpace(str))
+            throw new FormatException("Рядок порожній.");
+ 
+        long result = 0;
+ 
+        foreach (char c in str)
+        {
+            if (c < '0' || c > '9')
+                throw new FormatException("Допустимі лише цифри 0-9.");
+ 
+            result = result * 10 + (c - '0');
+ 
+            if (result > int.MaxValue)
+                throw new OverflowException("Число виходить за межі int.");
+        }
+ 
+        return (int)result;
+    }
+ 
+ 
+    static int CalculateExpression(string expr)
+    {
+        if (string.IsNullOrWhiteSpace(expr))
+            throw new FormatException("Вираз порожній.");
+ 
+        string[] parts = expr.Split('*');
+ 
+        checked
+        {
+            int result = 1;
+ 
+            foreach (string part in parts)
+            {
+                if (!int.TryParse(part, out int number))
+                    throw new FormatException($"Некоректне число: {part}");
+ 
+                result *= number;
+            }
+ 
+            return result;
+        }
+    }
+}
