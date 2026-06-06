@@ -1,0 +1,96 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+
+class Statistics
+{
+    private int words;
+    private int lines;
+    private int punctuation;
+
+    private readonly object locker = new object();
+
+    public void Add(int w, int l, int p)
+    {
+        Interlocked.Add(ref words, w);
+        Interlocked.Add(ref lines, l);
+
+        lock (locker)
+        {
+            punctuation += p;
+        }
+    }
+
+    public int Words => words;
+    public int Lines => lines;
+    public int Punctuation => punctuation;
+}
+
+class Program
+{
+    static Statistics stats = new Statistics();
+
+    static void AnalyzeFile(object pathObj)
+    {
+        string path = (string)pathObj;
+
+        string text = File.ReadAllText(path);
+
+        int words = text.Split(
+            new char[] { ' ', '\t', '\r', '\n' },
+            StringSplitOptions.RemoveEmptyEntries
+        ).Length;
+
+        int lines = File.ReadAllLines(path).Length;
+
+        char[] punctuationMarks =
+        {
+            '.', ',', ';', ':', '-', '—', '‒', '!', '?',
+            '"', '\'', '«', '»', '(', ')', '{', '}',
+            '[', ']', '<', '>', '/'
+        };
+
+        int punctuation = text.Count(c => punctuationMarks.Contains(c));
+
+        stats.Add(words, lines, punctuation);
+
+        Console.WriteLine($"Файл: {Path.GetFileName(path)}");
+        Console.WriteLine($"Слів: {words}");
+        Console.WriteLine($"Рядків: {lines}");
+        Console.WriteLine($"Розділових знаків: {punctuation}");
+        Console.WriteLine();
+    }
+
+    static void Main()
+    {
+        Console.Write("Введіть шлях до директорії: ");
+        string directory = Console.ReadLine();
+
+        if (!Directory.Exists(directory))
+        {
+            Console.WriteLine("Директорію не знайдено.");
+            return;
+        }
+
+        string[] files = Directory.GetFiles(directory, "*.txt");
+
+        Thread[] threads = new Thread[files.Length];
+
+        for (int i = 0; i < files.Length; i++)
+        {
+            threads[i] = new Thread(AnalyzeFile);
+            threads[i].Start(files[i]);
+        }
+
+        foreach (Thread thread in threads)
+        {
+            thread.Join();
+        }
+
+        Console.WriteLine("Загальна статистика:");
+        Console.WriteLine($"Слів: {stats.Words}");
+        Console.WriteLine($"Рядків: {stats.Lines}");
+        Console.WriteLine($"Розділових знаків: {stats.Punctuation}");
+    }
+}
