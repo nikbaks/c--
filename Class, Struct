@@ -1,0 +1,147 @@
+using System;
+using System.Linq;
+
+class Worker
+{
+    private string name;
+    private int age;
+    private decimal salary;
+    private DateTime hireDate;
+
+    public string Name
+    {
+        get => name;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new FormatException("Некоректне ПІБ");
+            name = value;
+        }
+    }
+
+    public int Age
+    {
+        get => age;
+        set
+        {
+            if (value < 18 || value > 100)
+                throw new ArgumentException("Некоректний вік");
+            age = value;
+        }
+    }
+
+    public decimal Salary
+    {
+        get => salary;
+        set
+        {
+            if (value < 0)
+                throw new ArgumentException("Некоректна зарплата");
+            salary = value;
+        }
+    }
+
+    public DateTime HireDate
+    {
+        get => hireDate;
+        set
+        {
+            if (value > DateTime.Now)
+                throw new ArgumentException("Некоректна дата");
+            hireDate = value;
+        }
+    }
+
+    public int Experience =>
+        DateTime.Now.Year - HireDate.Year;
+}
+
+class Calculator
+{
+    public double Add(double a, double b) => a + b;
+    public double Sub(double a, double b) => a - b;
+    public double Mul(double a, double b) => a * b;
+
+    public double Div(double a, double b)
+    {
+        if (b == 0)
+            throw new DivideByZeroException("Ділення на нуль");
+        return a / b;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Worker[] workers = new Worker[5];
+
+        try
+        {
+            for (int i = 0; i < workers.Length; i++)
+            {
+                workers[i] = new Worker();
+
+                Console.WriteLine($"Працівник {i + 1}");
+
+                Console.Write("ПІБ: ");
+                workers[i].Name = Console.ReadLine();
+
+                Console.Write("Вік: ");
+                workers[i].Age = int.Parse(Console.ReadLine());
+
+                Console.Write("Зарплата: ");
+                workers[i].Salary = decimal.Parse(Console.ReadLine());
+
+                Console.Write("Дата прийняття (dd.MM.yyyy): ");
+                workers[i].HireDate = DateTime.Parse(Console.ReadLine());
+            }
+
+            workers = workers.OrderBy(w => w.Name).ToArray();
+
+            Console.Write("Введіть мінімальний стаж: ");
+            int years = int.Parse(Console.ReadLine());
+
+            Console.WriteLine("Працівники зі стажем більше заданого:");
+
+            foreach (var worker in workers)
+            {
+                if (worker.Experience > years)
+                    Console.WriteLine(worker.Name);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
+
+        Calculator calc = new Calculator();
+
+        try
+        {
+            Console.Write("Перше число: ");
+            double a = double.Parse(Console.ReadLine());
+
+            Console.Write("Друге число: ");
+            double b = double.Parse(Console.ReadLine());
+
+            Console.Write("Операція (+, -, *, /): ");
+            string op = Console.ReadLine();
+
+            double result = op switch
+            {
+                "+" => calc.Add(a, b),
+                "-" => calc.Sub(a, b),
+                "*" => calc.Mul(a, b),
+                "/" => calc.Div(a, b),
+                _ => throw new InvalidOperationException("Невідома операція")
+            };
+
+            Console.WriteLine($"Результат: {result}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
+    }
+}
