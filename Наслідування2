@@ -1,0 +1,104 @@
+using System;
+using System.Linq;
+
+namespace GeometricFigures
+{
+    public abstract class GeometricFigure
+    {
+        public abstract double GetArea();
+        public abstract double GetPerimeter();
+    }
+
+    public class Triangle : GeometricFigure
+    {
+        public double A { get; }
+        public double B { get; }
+        public double C { get; }
+
+        public Triangle(double a, double b, double c)
+        {
+            if (a + b <= c || a + c <= b || b + c <= a)
+                throw new ArgumentException();
+            A = a; B = b; C = c;
+        }
+
+        public override double GetPerimeter() => A + B + C;
+
+        public override double GetArea()
+        {
+            double p = GetPerimeter() / 2;
+            return Math.Sqrt(p * (p - A) * (p - B) * (p - C));
+        }
+    }
+
+    public class Square : GeometricFigure
+    {
+        public double Side { get; }
+
+        public Square(double side)
+        {
+            Side = side;
+        }
+
+        public override double GetPerimeter() => 4 * Side;
+        public override double GetArea() => Side * Side;
+    }
+
+    public class Rhombus : GeometricFigure
+    {
+        public double Side { get; }
+        public double Height { get; }
+
+        public Rhombus(double side, double height)
+        {
+            Side = side;
+            Height = height;
+        }
+
+        public override double GetPerimeter() => 4 * Side;
+        public override double GetArea() => Side * Height;
+    }
+
+    public class Rectangle : GeometricFigure
+    {
+        public double Width { get; }
+        public double Height { get; }
+
+        public Rectangle(double width, double height)
+        {
+            Width = width;
+            Height = height;
+        }
+
+        public override double GetPerimeter() => 2 * (Width + Height);
+        public override double GetArea() => Width * Height;
+    }
+
+    public class Parallelogram : GeometricFigure
+    {
+        public double BaseSide { get; }
+        public double Side { get; }
+        public double Height { get; }
+
+        public Parallelogram(double baseSide, double side, double height)
+        {
+            BaseSide = baseSide;
+            Side = side;
+            Height = height;
+        }
+
+        public override double GetPerimeter() => 2 * (BaseSide + Side);
+        public override double GetArea() => BaseSide * Height;
+    }
+
+    public class Trapezoid : GeometricFigure
+    {
+        public double BaseA { get; }
+        public double BaseB { get; }
+        public double SideC { get; }
+        public double SideD { get; }
+        public double Height { get; }
+
+        public Trapezoid(double baseA, double baseB, double sideC, double sideD, double height)
+        {
+            BaseA = baseA;
