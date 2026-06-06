@@ -1,0 +1,228 @@
+using System;
+
+class Square
+{
+    public int A { get; set; }
+
+    public Square()
+    {
+        A = 0;
+    }
+
+    public Square(int a)
+    {
+        A = a;
+    }
+
+    public override string ToString()
+    {
+        return $"Square: A = {A}";
+    }
+
+    public static Square operator ++(Square s)
+    {
+        return new Square(s.A + 1);
+    }
+
+    public static Square operator --(Square s)
+    {
+        return new Square(Math.Max(0, s.A - 1));
+    }
+
+    public static Square operator +(Square s, int n)
+    {
+        return new Square(s.A + n);
+    }
+
+    public static Square operator -(Square s, int n)
+    {
+        return new Square(Math.Max(0, s.A - n));
+    }
+
+    public static Square operator *(Square s, int n)
+    {
+        return new Square(s.A * n);
+    }
+
+    public static Square operator /(Square s, int n)
+    {
+        return new Square(s.A / n);
+    }
+
+    public static bool operator >(Square a, Square b) => a.A > b.A;
+    public static bool operator <(Square a, Square b) => a.A < b.A;
+    public static bool operator >=(Square a, Square b) => a.A >= b.A;
+    public static bool operator <=(Square a, Square b) => a.A <= b.A;
+    public static bool operator ==(Square a, Square b) => a.A == b.A;
+    public static bool operator !=(Square a, Square b) => a.A != b.A;
+
+    public override bool Equals(object obj)
+    {
+        return obj is Square s && A == s.A;
+    }
+
+    public override int GetHashCode()
+    {
+        return A.GetHashCode();
+    }
+
+    public static bool operator true(Square s) => s.A != 0;
+    public static bool operator false(Square s) => s.A == 0;
+
+    public static implicit operator Rectangle(Square s)
+    {
+        return new Rectangle(s.A, s.A);
+    }
+
+    public static implicit operator int(Square s)
+    {
+        return s.A;
+    }
+}
+
+class Rectangle
+{
+    public int A { get; set; }
+    public int B { get; set; }
+
+    public Rectangle()
+    {
+        A = 0;
+        B = 0;
+    }
+
+    public Rectangle(int a, int b)
+    {
+        A = a;
+        B = b;
+    }
+
+    public override string ToString()
+    {
+        return $"Rectangle: A = {A}, B = {B}";
+    }
+
+    public static Rectangle operator ++(Rectangle r)
+    {
+        return new Rectangle(r.A + 1, r.B + 1);
+    }
+
+    public static Rectangle operator --(Rectangle r)
+    {
+        return new Rectangle(
+            Math.Max(0, r.A - 1),
+            Math.Max(0, r.B - 1));
+    }
+
+    public static Rectangle operator +(Rectangle r, int n)
+    {
+        return new Rectangle(r.A + n, r.B + n);
+    }
+
+    public static Rectangle operator -(Rectangle r, int n)
+    {
+        return new Rectangle(
+            Math.Max(0, r.A - n),
+            Math.Max(0, r.B - n));
+    }
+
+    public static Rectangle operator *(Rectangle r, int n)
+    {
+        return new Rectangle(r.A * n, r.B * n);
+    }
+
+    public static Rectangle operator /(Rectangle r, int n)
+    {
+        return new Rectangle(r.A / n, r.B / n);
+    }
+
+    public static bool operator >(Rectangle a, Rectangle b)
+    {
+        return a.A > b.A && a.B > b.B;
+    }
+
+    public static bool operator <(Rectangle a, Rectangle b)
+    {
+        return a.A < b.A && a.B < b.B;
+    }
+
+    public static bool operator >=(Rectangle a, Rectangle b)
+    {
+        return a.A >= b.A && a.B >= b.B;
+    }
+
+    public static bool operator <=(Rectangle a, Rectangle b)
+    {
+        return a.A <= b.A && a.B <= b.B;
+    }
+
+    public static bool operator ==(Rectangle a, Rectangle b)
+    {
+        return a.A == b.A && a.B == b.B;
+    }
+
+    public static bool operator !=(Rectangle a, Rectangle b)
+    {
+        return !(a == b);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is Rectangle r && A == r.A && B == r.B;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(A, B);
+    }
+
+    public static bool operator true(Rectangle r)
+    {
+        return r.A != 0 && r.B != 0;
+    }
+
+    public static bool operator false(Rectangle r)
+    {
+        return r.A == 0 || r.B == 0;
+    }
+
+    public static explicit operator Square(Rectangle r)
+    {
+        return new Square(Math.Min(r.A, r.B));
+    }
+
+    public static explicit operator int(Rectangle r)
+    {
+        return r.A * r.B;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Square s = new Square(5);
+        Rectangle r = new Rectangle(4, 6);
+
+        Console.WriteLine(s);
+        Console.WriteLine(r);
+
+        s++;
+        r++;
+
+        Console.WriteLine(s);
+        Console.WriteLine(r);
+
+        Rectangle r2 = s;
+        Square s2 = (Square)r;
+
+        Console.WriteLine(r2);
+        Console.WriteLine(s2);
+
+        int a = s;
+        int area = (int)r;
+
+        Console.WriteLine(a);
+        Console.WriteLine(area);
+    }
+}
