@@ -1,0 +1,132 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Task1()
+    {
+        Task t1 = new Task(() =>
+        {
+            Console.WriteLine("Start:");
+            Console.WriteLine(DateTime.Now);
+        });
+
+        t1.Start();
+        t1.Wait();
+
+        Task t2 = Task.Factory.StartNew(() =>
+        {
+            Console.WriteLine("StartNew:");
+            Console.WriteLine(DateTime.Now);
+        });
+
+        t2.Wait();
+
+        Task t3 = Task.Run(() =>
+        {
+            Console.WriteLine("Run:");
+            Console.WriteLine(DateTime.Now);
+        });
+
+        t3.Wait();
+    }
+
+    static bool IsPrime(int n)
+    {
+        if (n < 2) return false;
+
+        for (int i = 2; i <= Math.Sqrt(n); i++)
+        {
+            if (n % i == 0)
+                return false;
+        }
+
+        return true;
+    }
+
+    static void Task2()
+    {
+        Task task = Task.Run(() =>
+        {
+            for (int i = 0; i <= 1000; i++)
+            {
+                if (IsPrime(i))
+                    Console.Write(i + " ");
+            }
+        });
+
+        task.Wait();
+    }
+
+    static void Task3()
+    {
+        Console.Write("Початок діапазону: ");
+        int start = int.Parse(Console.ReadLine());
+
+        Console.Write("Кінець діапазону: ");
+        int end = int.Parse(Console.ReadLine());
+
+        int count = 0;
+
+        Task task = Task.Run(() =>
+        {
+            for (int i = start; i <= end; i++)
+            {
+                if (IsPrime(i))
+                {
+                    Console.Write(i + " ");
+                    count++;
+                }
+            }
+        });
+
+        task.Wait();
+
+        Console.WriteLine();
+        Console.WriteLine("Кількість простих чисел: " + count);
+    }
+
+    static void Task4()
+    {
+        int[] arr = { 10, 20, 30, 40, 50, 60, 70 };
+
+        Task<int> minTask = Task.Run(() => arr.Min());
+        Task<int> maxTask = Task.Run(() => arr.Max());
+        Task<double> avgTask = Task.Run(() => arr.Average());
+        Task<int> sumTask = Task.Run(() => arr.Sum());
+
+        Task.WaitAll(minTask, maxTask, avgTask, sumTask);
+
+        Console.WriteLine("Мінімум: " + minTask.Result);
+        Console.WriteLine("Максимум: " + maxTask.Result);
+        Console.WriteLine("Середнє: " + avgTask.Result);
+        Console.WriteLine("Сума: " + sumTask.Result);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("1 - Завдання 1");
+        Console.WriteLine("2 - Завдання 2");
+        Console.WriteLine("3 - Завдання 3");
+        Console.WriteLine("4 - Завдання 4");
+
+        int choice = int.Parse(Console.ReadLine());
+
+        switch (choice)
+        {
+            case 1:
+                Task1();
+                break;
+            case 2:
+                Task2();
+                break;
+            case 3:
+                Task3();
+                break;
+            case 4:
+                Task4();
+                break;
+        }
+    }
+}
