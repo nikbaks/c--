@@ -1,0 +1,88 @@
+using System;
+using System.IO;
+
+namespace FileCopyApp
+{
+    class Program
+    {
+        private static string _sourcePath = string.Empty;
+        private static string _destinationDirectory = string.Empty;
+
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("=== Додаток для копіювання файлів ===");
+                Console.WriteLine($"[From] Шлях до файлу: {_sourcePath}");
+                Console.WriteLine($"[To]   Директорія призначення: {_destinationDirectory}");
+                Console.WriteLine("=====================================");
+                Console.WriteLine("Натисніть F — щоб вказати джерело (From)");
+                Console.WriteLine("Натисніть T — щоб вказати призначення (To)");
+                Console.WriteLine("Натисніть C або Enter — щоб скопіювати (Copy)");
+                Console.WriteLine("Натисніть Escape — для виходу");
+
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+
+                if (keyInfo.Key == ConsoleKey.F)
+                {
+                    Console.Write("\nВведіть повний шлях до файлу, який треба скопіювати: ");
+                    _sourcePath = Console.ReadLine()?.Trim('\"') ?? string.Empty;
+                }
+                else if (keyInfo.Key == ConsoleKey.T)
+                {
+                    Console.Write("\nВведіть шлях до директорії, куди скопіювати файл: ");
+                    _destinationDirectory = Console.ReadLine()?.Trim('\"') ?? string.Empty;
+                }
+                else if (keyInfo.Key == ConsoleKey.C || keyInfo.Key == ConsoleKey.Enter)
+                {
+                    ExecuteCopy();
+                    Console.WriteLine("\nНатисніть будь-яку клавішу, щоб продовжити...");
+                    Console.ReadKey(true);
+                }
+                else if (keyInfo.Key == ConsoleKey.Escape)
+                {
+                    break;
+                }
+            }
+        }
+
+        private static void ExecuteCopy()
+        {
+            Console.WriteLine("\nЗапуск копіювання...");
+
+            if (string.IsNullOrWhiteSpace(_sourcePath) || string.IsNullOrWhiteSpace(_destinationDirectory))
+            {
+                Console.WriteLine("Помилка: Не вказано шлях джерела або призначення.");
+                return;
+            }
+
+            if (!File.Exists(_sourcePath))
+            {
+                Console.WriteLine("Помилка: Файл-джерело не існує за вказаним шляхом.");
+                return;
+            }
+
+            try
+            {
+                if (!Directory.Exists(_destinationDirectory))
+                {
+                    Directory.CreateDirectory(_destinationDirectory);
+                }
+
+                string fileName = Path.GetFileName(_sourcePath);
+                string destinationPath = Path.Combine(_destinationDirectory, fileName);
+
+                File.Copy(_sourcePath, destinationPath, true);
+
+                Console.WriteLine($"Успішно скопійовано в: {destinationPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Сталася помилка при копіюванні: {ex.Message}");
+            }
+        }
+    }
+}
