@@ -1,0 +1,153 @@
+using System;
+using System.Linq;
+
+namespace BookListApp
+{
+    public class Book
+    {
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public int Year { get; set; }
+
+        public Book(string title, string author, int year)
+        {
+            Title = title;
+            Author = author;
+            Year = year;
+        }
+
+        public override string ToString()
+        {
+            return $"\"{Title}\" — {Author} ({Year})";
+        }
+    }
+
+    public class BookList
+    {
+        private Book[] _books;
+
+        public int Count => _books.Length;
+
+        public BookList()
+        {
+            _books = Array.Empty<Book>();
+        }
+
+        public void Add(Book book)
+        {
+            if (book == null) return;
+            Array.Resize(ref _books, _books.Length + 1);
+            _books[^1] = book;
+        }
+
+        public bool Remove(string title)
+        {
+            int index = -1;
+            for (int i = 0; i < _books.Length; i++)
+            {
+                if (_books[i].Title.Equals(title, StringComparison.OrdinalIgnoreCase))
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == -1) return false;
+
+            Book[] newBooks = new Book[_books.Length - 1];
+            Array.Copy(_books, 0, newBooks, 0, index);
+            Array.Copy(_books, index + 1, newBooks, index, _books.Length - index - 1);
+            _books = newBooks;
+            return true;
+        }
+
+        public bool Contains(string title)
+        {
+            return _books.Any(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Book this[int index]
+        {
+            get => _books[index];
+            set => _books[index] = value;
+        }
+
+        public Book this[string title]
+        {
+            get
+            {
+                return _books.FirstOrDefault(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        public Book[] this[string author, bool isAuthorSearch]
+        {
+            get
+            {
+                if (!isAuthorSearch) return Array.Empty<Book>();
+                return _books.Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase)).ToArray();
+            }
+        }
+
+        public Book this[Index index]
+        {
+            get => _books[index];
+            set => _books[index] = value;
+        }
+
+        public Book[] this[Range range]
+        {
+            get => _books[range];
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            BookList myReads = new BookList();
+
+            myReads.Add(new Book("Кобзар", "Тарас Шевченко", 1840));
+            myReads.Add(new Book("Тигролови", "Іван Багряний", 1944));
+            myReads.Add(new Book("Сад Гетсиманський", "Іван Багряний", 1950));
+            myReads.Add(new Book("Intermezzo", "Михайло Коцюбинський", 1908));
+
+            Console.WriteLine($"Усього книг у списку: {myReads.Count}\n");
+
+            string searchTitle = "Тигролови";
+            Console.WriteLine($"Чи є книга '{searchTitle}' у списку? Відповідь: {myReads.Contains(searchTitle)}");
+            Console.WriteLine($"Чи є книга 'Гаррі Поттер' у списку? Відповідь: {myReads.Contains("Гаррі Поттер")}\n");
+
+            Console.WriteLine($"Перша книга (індекс 0): {myReads[0]}");
+            Console.WriteLine($"Остання книга (індекс ^1): {myReads[^1]}\n");
+
+            Book foundBook = myReads["Кобзар"];
+            if (foundBook != null)
+            {
+                Console.WriteLine($"Знайдено книгу за назвою: {foundBook}");
+            }
+
+            Console.WriteLine("\nКниги автора Іван Багряний:");
+            Book[] bagryanyBooks = myReads["Іван Багряний", true];
+            foreach (var book in bagryanyBooks)
+            {
+                Console.WriteLine($"- {book}");
+            }
+
+            Console.WriteLine("\nЗріз списку книг (індекси від 1 до 3):");
+            Book[] subList = myReads[1..3];
+            foreach (var book in subList)
+            {
+                Console.WriteLine($"- {book}");
+            }
+
+            Console.WriteLine("\nВидаляємо 'Тигролови'...");
+            myReads.Remove("Тигролови");
+
+            Console.WriteLine($"Чи залишилися 'Тигролови'? Відповідь: {myReads.Contains("Тигролови")}");
+            Console.WriteLine($"Нова кількість книг: {myReads.Count}");
+        }
+    }
+}
