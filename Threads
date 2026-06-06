@@ -1,0 +1,60 @@
+using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintRange(object obj)
+    {
+        int[] range = (int[])obj;
+
+        for (int i = range[0]; i <= range[1]; i++)
+        {
+            Console.WriteLine($"Потік {Thread.CurrentThread.ManagedThreadId}: {i}");
+        }
+    }
+
+    static void Main()
+    {
+        Console.Write("Початок діапазону: ");
+        int start = int.Parse(Console.ReadLine());
+
+        Console.Write("Кінець діапазону: ");
+        int end = int.Parse(Console.ReadLine());
+
+        Console.Write("Кількість потоків: ");
+        int threadCount = int.Parse(Console.ReadLine());
+
+        Thread[] threads = new Thread[threadCount];
+
+        int totalNumbers = end - start + 1;
+        int partSize = totalNumbers / threadCount;
+        int remainder = totalNumbers % threadCount;
+
+        int currentStart = start;
+
+        for (int i = 0; i < threadCount; i++)
+        {
+            int currentEnd = currentStart + partSize - 1;
+
+            if (remainder > 0)
+            {
+                currentEnd++;
+                remainder--;
+            }
+
+            int[] range = { currentStart, currentEnd };
+
+            threads[i] = new Thread(PrintRange);
+            threads[i].Start(range);
+
+            currentStart = currentEnd + 1;
+        }
+
+        foreach (Thread thread in threads)
+        {
+            thread.Join();
+        }
+
+        Console.WriteLine("Усі потоки завершили роботу.");
+    }
+}
