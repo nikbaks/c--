@@ -1,0 +1,209 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace CinemaProject
+{
+    public enum Genre
+    {
+        Action,
+        Comedy,
+        Drama,
+        Horror,
+        Fantasy,
+        Thriller,
+        SciFi
+    }
+
+    public class Director : ICloneable
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int Age { get; set; }
+
+        public Director(string firstName, string lastName, int age)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Age = age;
+        }
+
+        public object Clone()
+        {
+            return new Director(FirstName, LastName, Age);
+        }
+
+        public override string ToString()
+        {
+            return $"{FirstName} {LastName}, {Age}";
+        }
+    }
+
+    public class Movie : IComparable<Movie>, ICloneable
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public Director Director { get; set; }
+        public string Country { get; set; }
+        public Genre Genre { get; set; }
+        public int Year { get; set; }
+        public double Rating { get; set; }
+
+        public Movie(string title, string description, Director director,
+            string country, Genre genre, int year, double rating)
+        {
+            Title = title;
+            Description = description;
+            Director = director;
+            Country = country;
+            Genre = genre;
+            Year = year;
+            Rating = rating;
+        }
+
+        public int CompareTo(Movie other)
+        {
+            return Title.CompareTo(other.Title);
+        }
+
+        public object Clone()
+        {
+            return new Movie(
+                Title,
+                Description,
+                (Director)Director.Clone(),
+                Country,
+                Genre,
+                Year,
+                Rating
+            );
+        }
+
+        public override string ToString()
+        {
+            return $"Title: {Title}, Genre: {Genre}, Year: {Year}, Rating: {Rating}, Director: {Director}";
+        }
+    }
+
+    public class MovieTitleComparer : IComparer<Movie>
+    {
+        public int Compare(Movie x, Movie y)
+        {
+            return x.Title.CompareTo(y.Title);
+        }
+    }
+
+    public class MovieYearComparer : IComparer<Movie>
+    {
+        public int Compare(Movie x, Movie y)
+        {
+            return x.Year.CompareTo(y.Year);
+        }
+    }
+
+    public class MovieRatingComparer : IComparer<Movie>
+    {
+        public int Compare(Movie x, Movie y)
+        {
+            return y.Rating.CompareTo(x.Rating);
+        }
+    }
+
+    public class Cinema : IEnumerable<Movie>
+    {
+        private List<Movie> movies = new List<Movie>();
+
+        public void AddMovie(Movie movie)
+        {
+            movies.Add(movie);
+        }
+
+        public void Sort(IComparer<Movie> comparer)
+        {
+            movies.Sort(comparer);
+        }
+
+        public IEnumerator<Movie> GetEnumerator()
+        {
+            return movies.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            string result = "";
+
+            foreach (var movie in movies)
+            {
+                result += movie + "\n";
+            }
+
+            return result;
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Cinema cinema = new Cinema();
+
+            cinema.AddMovie(new Movie(
+                "Inception",
+                "Dreams",
+                new Director("Christopher", "Nolan", 53),
+                "USA",
+                Genre.SciFi,
+                2010,
+                9.2));
+
+            cinema.AddMovie(new Movie(
+                "Titanic",
+                "Love Story",
+                new Director("James", "Cameron", 69),
+                "USA",
+                Genre.Drama,
+                1997,
+                8.7));
+
+            cinema.AddMovie(new Movie(
+                "The Dark Knight",
+                "Batman",
+                new Director("Christopher", "Nolan", 53),
+                "USA",
+                Genre.Action,
+                2008,
+                9.0));
+
+            Console.WriteLine("All movies:");
+            foreach (var movie in cinema)
+            {
+                Console.WriteLine(movie);
+            }
+
+            cinema.Sort(new MovieYearComparer());
+
+            Console.WriteLine("\nSorted by year:");
+            foreach (var movie in cinema)
+            {
+                Console.WriteLine(movie);
+            }
+
+            cinema.Sort(new MovieRatingComparer());
+
+            Console.WriteLine("\nSorted by rating:");
+            foreach (var movie in cinema)
+            {
+                Console.WriteLine(movie);
+            }
+
+            Movie clone = (Movie)cinema.GetEnumerator().Current;
+
+            Console.ReadKey();
+        }
+    }
+}
