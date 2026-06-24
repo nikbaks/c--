@@ -1,0 +1,56 @@
+using System;
+
+namespace TaskInterfaces
+{
+    interface IOutput
+    {
+        void Show();
+        void Show(string info);
+    }
+
+    class Array : IOutput
+    {
+        private int[] arr;
+
+        public Array(int[] arr)
+        {
+            this.arr = arr;
+        }
+
+        public void Show()
+        {
+            foreach (int item in arr)
+            {
+                Console.Write(item + " ");
+            }
+            Console.WriteLine();
+        }
+
+        public void Show(string info)
+        {
+            Console.WriteLine(info);
+
+            foreach (int item in arr)
+            {
+                Console.Write(item + " ");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int[] numbers = { 5, 10, 15, 20, 25 };
+
+            Array array = new Array(numbers);
+
+            array.Show();
+
+            array.Show("Елементи масиву:");
+
+            Console.ReadKey();
+        }
+    }
+}
