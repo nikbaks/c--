@@ -1,0 +1,83 @@
+using System;
+
+class MyStack<T>
+{
+    private T[] items;
+    private int top;
+
+    public MyStack(int size = 10)
+    {
+        items = new T[size];
+        top = 0;
+    }
+
+    public void Push(T item)
+    {
+        if (top == items.Length)
+            Array.Resize(ref items, items.Length * 2);
+
+        items[top++] = item;
+    }
+
+    public T Pop()
+    {
+        if (top == 0)
+            throw new InvalidOperationException("Стек порожній");
+
+        return items[--top];
+    }
+
+    public T Peek()
+    {
+        if (top == 0)
+            throw new InvalidOperationException("Стек порожній");
+
+        return items[top - 1];
+    }
+
+    public int Count
+    {
+        get { return top; }
+    }
+}
+
+class Program
+{
+    static void Swap<T>(ref T a, ref T b)
+    {
+        T temp = a;
+        a = b;
+        b = temp;
+    }
+
+    static void Main()
+    {
+        int x = 10;
+        int y = 20;
+
+        Console.WriteLine("Завдання 1");
+        Console.WriteLine($"До обміну: x = {x}, y = {y}");
+
+        Swap(ref x, ref y);
+
+        Console.WriteLine($"Після обміну: x = {x}, y = {y}");
+
+        Console.WriteLine();
+
+        Console.WriteLine("Завдання 2");
+
+        MyStack<int> stack = new MyStack<int>();
+
+        stack.Push(10);
+        stack.Push(20);
+        stack.Push(30);
+
+        Console.WriteLine("Кількість елементів: " + stack.Count);
+        Console.WriteLine("Верхній елемент: " + stack.Peek());
+        Console.WriteLine("Видалено: " + stack.Pop());
+        Console.WriteLine("Верхній елемент: " + stack.Peek());
+        Console.WriteLine("Кількість елементів: " + stack.Count);
+
+        Console.ReadKey();
+    }
+}
