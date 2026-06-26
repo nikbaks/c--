@@ -1,0 +1,86 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Firm
+{
+    public string Name { get; set; }
+    public DateTime FoundationDate { get; set; }
+    public string BusinessProfile { get; set; }
+    public string Director { get; set; }
+    public int Employees { get; set; }
+    public string Address { get; set; }
+
+    public Firm(string name, DateTime foundationDate, string businessProfile, string director, int employees, string address)
+    {
+        Name = name;
+        FoundationDate = foundationDate;
+        BusinessProfile = businessProfile;
+        Director = director;
+        Employees = employees;
+        Address = address;
+    }
+
+    public override string ToString()
+    {
+        return $"Назва: {Name}, Дата: {FoundationDate:dd.MM.yyyy}, Профіль: {BusinessProfile}, Директор: {Director}, Працівників: {Employees}, Адреса: {Address}";
+    }
+}
+
+class Program
+{
+    static void Show(IEnumerable<Firm> firms)
+    {
+        foreach (var firm in firms)
+            Console.WriteLine(firm);
+
+        Console.WriteLine();
+    }
+
+    static void Main()
+    {
+        List<Firm> firms = new List<Firm>
+        {
+            new Firm("Food Market", new DateTime(2020,5,1), "Маркетинг", "John White", 150, "London"),
+            new Firm("White Tech", new DateTime(2023,2,23), "IT", "Jack Black", 250, "London"),
+            new Firm("Global Food", DateTime.Today.AddDays(-123), "Маркетинг", "Tom Green", 90, "Paris"),
+            new Firm("Soft Group", new DateTime(2021,10,15), "IT", "Mike White", 350, "Berlin"),
+            new Firm("White Food", new DateTime(2019,6,10), "Продаж", "Alex Black", 180, "London")
+        };
+
+        Console.WriteLine("Всі фірми:");
+        Show(firms);
+
+        Console.WriteLine("Назва містить Food:");
+        Show(firms.Where(f => f.Name.Contains("Food")));
+
+        Console.WriteLine("Маркетинг:");
+        Show(firms.Where(f => f.BusinessProfile == "Маркетинг"));
+
+        Console.WriteLine("Маркетинг або IT:");
+        Show(firms.Where(f => f.BusinessProfile == "Маркетинг" || f.BusinessProfile == "IT"));
+
+        Console.WriteLine("Працівників більше 100:");
+        Show(firms.Where(f => f.Employees > 100));
+
+        Console.WriteLine("Працівників від 100 до 300:");
+        Show(firms.Where(f => f.Employees >= 100 && f.Employees <= 300));
+
+        Console.WriteLine("Фірми в Лондоні:");
+        Show(firms.Where(f => f.Address == "London"));
+
+        Console.WriteLine("Директор White:");
+        Show(firms.Where(f => f.Director.Split(' ').Last() == "White"));
+
+        Console.WriteLine("Засновані більше двох років тому:");
+        Show(firms.Where(f => (DateTime.Today - f.FoundationDate).TotalDays > 730));
+
+        Console.WriteLine("Минуло 123 дні з дня заснування:");
+        Show(firms.Where(f => (DateTime.Today - f.FoundationDate).Days == 123));
+
+        Console.WriteLine("Директор Black і назва містить White:");
+        Show(firms.Where(f => f.Director.Split(' ').Last() == "Black" && f.Name.Contains("White")));
+
+        Console.ReadKey();
+    }
+}
