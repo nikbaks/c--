@@ -1,0 +1,124 @@
+using System;
+using System.Collections.Generic;
+
+namespace DelegateArrayMethods
+{
+    delegate int[] ArrayDelegate(int[] array);
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int[] numbers = { 1, 2, 3, 4, 5, 8, 10, 13, 17, 21, 34, 55, 89, 100 };
+
+            ArrayDelegate del;
+
+            del = GetEvenNumbers;
+            PrintResult("Парні числа", del(numbers));
+
+            del = GetOddNumbers;
+            PrintResult("Непарні числа", del(numbers));
+
+            del = GetPrimeNumbers;
+            PrintResult("Прості числа", del(numbers));
+
+            del = GetFibonacciNumbers;
+            PrintResult("Числа Фібоначчі", del(numbers));
+
+            Console.ReadKey();
+        }
+
+        static int[] GetEvenNumbers(int[] array)
+        {
+            List<int> result = new List<int>();
+
+            foreach (int num in array)
+            {
+                if (num % 2 == 0)
+                    result.Add(num);
+            }
+
+            return result.ToArray();
+        }
+
+        static int[] GetOddNumbers(int[] array)
+        {
+            List<int> result = new List<int>();
+
+            foreach (int num in array)
+            {
+                if (num % 2 != 0)
+                    result.Add(num);
+            }
+
+            return result.ToArray();
+        }
+
+        static int[] GetPrimeNumbers(int[] array)
+        {
+            List<int> result = new List<int>();
+
+            foreach (int num in array)
+            {
+                if (IsPrime(num))
+                    result.Add(num);
+            }
+
+            return result.ToArray();
+        }
+
+        static bool IsPrime(int number)
+        {
+            if (number < 2)
+                return false;
+
+            for (int i = 2; i <= Math.Sqrt(number); i++)
+            {
+                if (number % i == 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        static int[] GetFibonacciNumbers(int[] array)
+        {
+            List<int> result = new List<int>();
+
+            foreach (int num in array)
+            {
+                if (IsFibonacci(num))
+                    result.Add(num);
+            }
+
+            return result.ToArray();
+        }
+
+        static bool IsFibonacci(int number)
+        {
+            int a = 0;
+            int b = 1;
+
+            while (b < number)
+            {
+                int temp = a + b;
+                a = b;
+                b = temp;
+            }
+
+            return number == 0 || number == b;
+        }
+
+        static void PrintResult(string title, int[] array)
+        {
+            Console.Write(title + ": ");
+
+            foreach (int num in array)
+            {
+                Console.Write(num + " ");
+            }
+
+            Console.WriteLine();
+        }
+    }
+}
