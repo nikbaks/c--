@@ -1,0 +1,156 @@
+using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string currentPath = Directory.GetCurrentDirectory();
+
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("=== ФАЙЛОВИЙ МЕНЕДЖЕР ===");
+            Console.WriteLine("Поточна папка:");
+            Console.WriteLine(currentPath);
+            Console.WriteLine();
+
+            ShowContent(currentPath);
+
+            Console.WriteLine();
+            Console.WriteLine("1 - Відкрити папку");
+            Console.WriteLine("2 - Назад");
+            Console.WriteLine("3 - Відкрити файл");
+            Console.WriteLine("4 - Видалити");
+            Console.WriteLine("5 - Перейменувати");
+            Console.WriteLine("0 - Вихід");
+            Console.Write("Оберіть дію: ");
+
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    Console.Write("Назва папки: ");
+                    string folder = Console.ReadLine();
+
+                    string folderPath = Path.Combine(currentPath, folder);
+
+                    if (Directory.Exists(folderPath))
+                        currentPath = folderPath;
+                    else
+                        Console.WriteLine("Папка не знайдена.");
+
+                    Pause();
+                    break;
+
+                case "2":
+                    DirectoryInfo parent = Directory.GetParent(currentPath);
+
+                    if (parent != null)
+                        currentPath = parent.FullName;
+
+                    break;
+
+                case "3":
+                    Console.Write("Назва файлу: ");
+                    string file = Console.ReadLine();
+
+                    string filePath = Path.Combine(currentPath, file);
+
+                    if (File.Exists(filePath))
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(File.ReadAllText(filePath));
+                    }
+                    else
+                        Console.WriteLine("Файл не знайдений.");
+
+                    Pause();
+                    break;
+
+                case "4":
+                    Console.Write("Назва файлу або папки: ");
+                    string deleteName = Console.ReadLine();
+
+                    string deletePath = Path.Combine(currentPath, deleteName);
+
+                    if (File.Exists(deletePath))
+                    {
+                        File.Delete(deletePath);
+                        Console.WriteLine("Файл видалено.");
+                    }
+                    else if (Directory.Exists(deletePath))
+                    {
+                        Directory.Delete(deletePath, true);
+                        Console.WriteLine("Папку видалено.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Не знайдено.");
+                    }
+
+                    Pause();
+                    break;
+
+                case "5":
+                    Console.Write("Поточна назва: ");
+                    string oldName = Console.ReadLine();
+
+                    Console.Write("Нова назва: ");
+                    string newName = Console.ReadLine();
+
+                    string oldPath = Path.Combine(currentPath, oldName);
+                    string newPath = Path.Combine(currentPath, newName);
+
+                    if (File.Exists(oldPath))
+                    {
+                        File.Move(oldPath, newPath);
+                        Console.WriteLine("Файл перейменовано.");
+                    }
+                    else if (Directory.Exists(oldPath))
+                    {
+                        Directory.Move(oldPath, newPath);
+                        Console.WriteLine("Папку перейменовано.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Не знайдено.");
+                    }
+
+                    Pause();
+                    break;
+
+                case "0":
+                    return;
+
+                default:
+                    Console.WriteLine("Невірна команда.");
+                    Pause();
+                    break;
+            }
+        }
+    }
+
+    static void ShowContent(string path)
+    {
+        Console.WriteLine("Папки:");
+
+        foreach (string dir in Directory.GetDirectories(path))
+            Console.WriteLine("[D] " + Path.GetFileName(dir));
+
+        Console.WriteLine();
+
+        Console.WriteLine("Файли:");
+
+        foreach (string file in Directory.GetFiles(path))
+            Console.WriteLine("[F] " + Path.GetFileName(file));
+    }
+
+    static void Pause()
+    {
+        Console.WriteLine();
+        Console.WriteLine("Натисніть Enter...");
+        Console.ReadLine();
+    }
+}
