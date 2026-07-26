@@ -1,0 +1,388 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace DictionaryApp
+{
+    public class Dictionary
+    {
+        public string Name { get; private set; }
+        private Dictionary<string, List<string>> data = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        public Dictionary(string name)
+        {
+            Name = name;
+        }
+
+        public void AddWord(string word, List<string> translations)
+        {
+            if (data.ContainsKey(word))
+            {
+                foreach (var tr in translations)
+                {
+                    if (!data[word].Contains(tr, StringComparer.OrdinalIgnoreCase))
+                    {
+                        data[word].Add(tr);
+                    }
+                }
+            }
+            else
+            {
+                data[word] = new List<string>(translations);
+            }
+        }
+
+        public bool ReplaceWord(string oldWord, string newWord)
+        {
+            if (!data.ContainsKey(oldWord)) return false;
+
+            var translations = data[oldWord];
+            data.Remove(oldWord);
+            data[newWord] = translations;
+            return true;
+        }
+
+        public bool ReplaceTranslation(string word, string oldTr, string newTr)
+        {
+            if (!data.ContainsKey(word)) return false;
+
+            var translations = data[word];
+            int index = translations.FindIndex(t => t.Equals(oldTr, StringComparison.OrdinalIgnoreCase));
+
+            if (index != -1)
+            {
+                translations[index] = newTr;
+                return true;
+            }
+            return false;
+        }
+
+        public bool RemoveWord(string word)
+        {
+            return data.Remove(word);
+        }
+
+        public int RemoveTranslation(string word, string translation)
+        {
+            if (!data.ContainsKey(word)) return 0;
+
+            var translations = data[word];
+            if (translations.Count <= 1) return 1;
+
+            int index = translations.FindIndex(t => t.Equals(translation, StringComparison.OrdinalIgnoreCase));
+            if (index != -1)
+            {
+                translations.RemoveAt(index);
+                return 2;
+            }
+            return 3;
+        }
+
+        public List<string> FindWord(string word)
+        {
+            if (data.TryGetValue(word, out var translations))
+            {
+                return translations;
+            }
+            return null;
+        }
+
+        public bool ExportWordToFile(string word, string filename)
+        {
+            if (!data.ContainsKey(word)) return false;
+
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(filename, false, Encoding.UTF8))
+                {
+                    writer.WriteLine($"Слово: {word}");
+                    writer.WriteLine("Переклади:");
+                    foreach (var tr in data[word])
+                    {
+                        writer.WriteLine($" - {tr}");
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void SaveToFile()
+        {
+            string fileName = $"{Name}.txt";
+            using (StreamWriter writer = new StreamWriter(fileName, false, Encoding.UTF8))
+            {
+                foreach (var pair in data)
+                {
+                    writer.WriteLine($"{pair.Key}|{string.Join(",", pair.Value)}");
+                }
+            }
+        }
+
+        public void LoadFromFile()
+        {
+            string fileName = $"{Name}.txt";
+            if (!File.Exists(fileName)) return;
+
+            data.Clear();
+            string[] lines = File.ReadAllLines(fileName, Encoding.UTF8);
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var parts = line.Split('|');
+                if (parts.Length == 2)
+                {
+                    string word = parts[0].Trim();
+                    var translations = parts[1].Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToList();
+                    data[word] = translations;
+                }
+            }
+        }
+    }
+
+    public class DictionaryManager
+    {
+        private Dictionary<string, Dictionary> dictionaries = new Dictionary<string, Dictionary>(StringComparer.OrdinalIgnoreCase);
+
+        public void CreateDictionary(string name)
+        {
+            if (!dictionaries.ContainsKey(name))
+            {
+                Dictionary dict = new Dictionary(name);
+                dict.LoadFromFile();
+                dictionaries[name] = dict;
+                Console.WriteLine($"Словник '{name}' успішно створено/завантажено!");
+            }
+            else
+            {
+                Console.WriteLine("Словник з такою назвою вже відкритий у програмі.");
+            }
+        }
+
+        public Dictionary GetDictionary(string name)
+        {
+            dictionaries.TryGetValue(name, out var dict);
+            return dict;
+        }
+
+        public void ListDictionaries()
+        {
+            if (dictionaries.Count == 0)
+            {
+                Console.WriteLine("Немає активних словників.");
+                return;
+            }
+
+            Console.WriteLine("\nДоступні словники:");
+            foreach (var key in dictionaries.Keys)
+            {
+                Console.WriteLine($" - {key}");
+            }
+        }
+
+        public void SaveAll()
+        {
+            foreach (var dict in dictionaries.Values)
+            {
+                dict.SaveToFile();
+            }
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.InputEncoding = Encoding.UTF8;
+
+            DictionaryManager manager = new DictionaryManager();
+
+            while (true)
+            {
+                Console.WriteLine("\n================ ГОЛОВНЕ МЕНЮ ================");
+                Console.WriteLine("1. Створити / відкрити словник");
+                Console.WriteLine("2. Показати список відкритих словників");
+                Console.WriteLine("0. Вийти з програми");
+                Console.WriteLine("==============================================");
+                Console.Write("Ваш вибір: ");
+
+                string choice = Console.ReadLine();
+
+                if (choice == "0")
+                {
+                    manager.SaveAll();
+                    Console.WriteLine("Усі дані збережено. До побачення!");
+                    break;
+                }
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.Write("Введіть тип/назву словника (наприклад, 'En-Ukr' або 'Ukr-En'): ");
+                        string dictName = Console.ReadLine()?.Trim();
+                        if (!string.IsNullOrEmpty(dictName))
+                        {
+                            manager.CreateDictionary(dictName);
+                            var dict = manager.GetDictionary(dictName);
+                            if (dict != null) WorkWithDictionary(dict);
+                        }
+                        break;
+
+                    case "2":
+                        manager.ListDictionaries();
+                        break;
+
+                    default:
+                        Console.WriteLine("Невірний вибір. Спробуйте ще раз.");
+                        break;
+                }
+            }
+        }
+
+        private static void WorkWithDictionary(Dictionary dict)
+        {
+            while (true)
+            {
+                Console.WriteLine($"\n--- СЛОВНИК: {dict.Name} ---");
+                Console.WriteLine("1. Додати слово та переклад");
+                Console.WriteLine("2. Знайти переклад слова");
+                Console.WriteLine("3. Замінити слово");
+                Console.WriteLine("4. Замінити переклад слова");
+                Console.WriteLine("5. Видалити слово");
+                Console.WriteLine("6. Видалити один варіант перекладу");
+                Console.WriteLine("7. Експортувати слово у файл");
+                Console.WriteLine("0. Повернутися до головного меню");
+                Console.Write("Ваш вибір: ");
+
+                string choice = Console.ReadLine();
+
+                if (choice == "0")
+                {
+                    dict.SaveToFile();
+                    break;
+                }
+
+                string word, newWord, tr, newTr, filename;
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.Write("Введіть слово: ");
+                        word = Console.ReadLine()?.Trim();
+                        var translations = InputTranslations();
+                        if (!string.IsNullOrEmpty(word) && translations.Count > 0)
+                        {
+                            dict.AddWord(word, translations);
+                            Console.WriteLine("Слово успішно додано/оновлено!");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Слово або переклади не можуть бути порожніми.");
+                        }
+                        break;
+
+                    case "2":
+                        Console.Write("Введіть слово для пошуку: ");
+                        word = Console.ReadLine()?.Trim();
+                        var result = dict.FindWord(word);
+                        if (result != null)
+                        {
+                            Console.WriteLine($"Переклади для '{word}':");
+                            foreach (var item in result)
+                            {
+                                Console.WriteLine($" - {item}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Слово не знайдено.");
+                        }
+                        break;
+
+                    case "3":
+                        Console.Write("Введіть слово, яке хочете замінити: ");
+                        word = Console.ReadLine()?.Trim();
+                        Console.Write("Введіть нове слово: ");
+                        newWord = Console.ReadLine()?.Trim();
+                        if (dict.ReplaceWord(word, newWord))
+                            Console.WriteLine("Слово успішно замінено!");
+                        else
+                            Console.WriteLine("Слово не знайдено.");
+                        break;
+
+                    case "4":
+                        Console.Write("Введіть слово: ");
+                        word = Console.ReadLine()?.Trim();
+                        Console.Write("Введіть переклад, який треба змінити: ");
+                        tr = Console.ReadLine()?.Trim();
+                        Console.Write("Введіть новий переклад: ");
+                        newTr = Console.ReadLine()?.Trim();
+                        if (dict.ReplaceTranslation(word, tr, newTr))
+                            Console.WriteLine("Переклад замінено!");
+                        else
+                            Console.WriteLine("Слово або вказаний переклад не знайдено.");
+                        break;
+
+                    case "5":
+                        Console.Write("Введіть слово для видалення: ");
+                        word = Console.ReadLine()?.Trim();
+                        if (dict.RemoveWord(word))
+                            Console.WriteLine("Слово та всі його переклади видалено!");
+                        else
+                            Console.WriteLine("Слово не знайдено.");
+                        break;
+
+                    case "6":
+                        Console.Write("Введіть слово: ");
+                        word = Console.ReadLine()?.Trim();
+                        Console.Write("Введіть варіант перекладу для видалення: ");
+                        tr = Console.ReadLine()?.Trim();
+
+                        int res = dict.RemoveTranslation(word, tr);
+                        if (res == 2) Console.WriteLine("Варіант перекладу видалено!");
+                        else if (res == 1) Console.WriteLine("Помилка: Не можна видалити останній переклад слова!");
+                        else if (res == 3) Console.WriteLine("Такого варіанту перекладу не знайдено.");
+                        else Console.WriteLine("Слово не знайдено.");
+                        break;
+
+                    case "7":
+                        Console.Write("Введіть слово для експорту: ");
+                        word = Console.ReadLine()?.Trim();
+                        Console.Write("Введіть назву файлу для експорту (наприклад, result.txt): ");
+                        filename = Console.ReadLine()?.Trim();
+                        if (dict.ExportWordToFile(word, filename))
+                            Console.WriteLine($"Слово успішно експортовано у файл '{filename}'!");
+                        else
+                            Console.WriteLine("Не вдалося експортувати (слово не знайдено або помилка запису).");
+                        break;
+
+                    default:
+                        Console.WriteLine("Невірний вибір. Спробуйте ще раз.");
+                        break;
+                }
+            }
+        }
+
+        private static List<string> InputTranslations()
+        {
+            List<string> translations = new List<string>();
+            Console.WriteLine("Введіть варіанти перекладу (введіть '0' для завершення):");
+            while (true)
+            {
+                Console.Write("> ");
+                string tr = Console.ReadLine()?.Trim();
+                if (tr == "0") break;
+                if (!string.IsNullOrEmpty(tr)) translations.Add(tr);
+            }
+            return translations;
+        }
+    }
+}
