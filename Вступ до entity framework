@@ -1,0 +1,97 @@
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
+// ==========================================
+// ЗАВДАННЯ 1: МОДЕЛЬ ДАНИХ (GameApp.Models)
+// ==========================================
+namespace GameApp.Models
+{
+    public class Game
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Developer { get; set; } = string.Empty;
+        public string Genre { get; set; } = string.Empty;
+        public DateTime ReleaseDate { get; set; }
+    }
+}
+
+// ==========================================
+// ЗАВДАННЯ 2: КОНТЕКСТ БАЗИ ДАНИХ (GameApp.Data)
+// ==========================================
+namespace GameApp.Data
+{
+    using GameApp.Models;
+
+    public class GameDbContext : DbContext
+    {
+        public DbSet<Game> Games { get; set; }
+
+        public GameDbContext()
+        {
+        }
+
+        public GameDbContext(DbContextOptions<GameDbContext> options) : base(options)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=GamesDb;Trusted_Connection=True;");
+            }
+        }
+    }
+}
+
+// ==========================================
+// ДОДАТОК ДЛЯ ТЕСТУВАННЯ (GameApp.Console)
+// ==========================================
+namespace GameApp.ConsoleApp
+{
+    using GameApp.Data;
+    using GameApp.Models;
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            using (var context = new GameDbContext())
+            {
+                context.Database.EnsureCreated();
+
+                if (!context.Games.Any())
+                {
+                    var game1 = new Game
+                    {
+                        Title = "The Witcher 3: Wild Hunt",
+                        Developer = "CD Projekt Red",
+                        Genre = "RPG",
+                        ReleaseDate = new DateTime(2015, 5, 19)
+                    };
+
+                    var game2 = new Game
+                    {
+                        Title = "S.T.A.L.K.E.R. 2: Heart of Chornobyl",
+                        Developer = "GSC Game World",
+                        Genre = "FPS / Survival horror",
+                        ReleaseDate = new DateTime(2024, 11, 20)
+                    };
+
+                    context.Games.AddRange(game1, game2);
+                    context.SaveChanges();
+
+                    Console.WriteLine("Базу даних створено та початкові дані додано!");
+                }
+
+                Console.WriteLine("\nСписок ігор у базі даних:");
+                foreach (var game in context.Games)
+                {
+                    Console.WriteLine($"[{game.Id}] {game.Title} | Розробник: {game.Developer} | Жанр: {game.Genre} | Реліз: {game.ReleaseDate:dd.MM.yyyy}");
+                }
+            }
+        }
+    }
+}
