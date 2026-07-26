@@ -1,0 +1,139 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
+class Program
+{
+    static List<string> quotes = new List<string>()
+    {
+        "Життя – це те, що відбувається, поки ви будуєте плани.",
+        "Ніколи не здавайся.",
+        "Успіх приходить до тих, хто діє.",
+        "Мрії здійснюються, якщо працювати.",
+        "Кожен день – нова можливість.",
+        "Не бійся помилок.",
+        "Навчання — шлях до успіху."
+    };
+
+    static Random random = new Random();
+    static object locker = new object();
+
+    static void Main()
+    {
+        Console.WriteLine("1 - Сервер");
+        Console.WriteLine("2 - Клієнт");
+        Console.Write("Вибір: ");
+
+        string choice = Console.ReadLine();
+
+        if (choice == "1")
+            StartServer();
+        else if (choice == "2")
+            StartClient();
+    }
+
+    static void StartServer()
+    {
+        TcpListener server = new TcpListener(IPAddress.Any, 5000);
+        server.Start();
+
+        Console.WriteLine("Сервер запущений...");
+
+        while (true)
+        {
+            TcpClient client = server.AcceptTcpClient();
+            Thread thread = new Thread(() => HandleClient(client));
+            thread.Start();
+        }
+    }
+
+    static void HandleClient(TcpClient client)
+    {
+        string clientInfo = client.Client.RemoteEndPoint.ToString();
+
+        Log($"{DateTime.Now} | Підключився: {clientInfo}");
+
+        NetworkStream stream = client.GetStream();
+        StreamReader reader = new StreamReader(stream);
+        StreamWriter writer = new StreamWriter(stream);
+
+        writer.AutoFlush = true;
+
+        while (true)
+        {
+            string request;
+
+            try
+            {
+                request = reader.ReadLine();
+            }
+            catch
+            {
+                break;
+            }
+
+            if (request == null || request.ToLower() == "exit")
+                break;
+
+            string quote;
+
+            lock (locker)
+            {
+                quote = quotes[random.Next(quotes.Count)];
+            }
+
+            writer.WriteLine(quote);
+
+            Log($"{DateTime.Now} | {clientInfo} -> {quote}");
+        }
+
+        Log($"{DateTime.Now} | Відключився: {clientInfo}");
+
+        client.Close();
+    }
+
+    static void StartClient()
+    {
+        TcpClient client = new TcpClient("127.0.0.1", 5000);
+
+        NetworkStream stream = client.GetStream();
+
+        StreamReader reader = new StreamReader(stream);
+        StreamWriter writer = new StreamWriter(stream);
+
+        writer.AutoFlush = true;
+
+        Console.WriteLine("Підключено до сервера.");
+
+        while (true)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Enter - отримати цитату");
+            Console.WriteLine("exit - вийти");
+
+            string command = Console.ReadLine();
+
+            writer.WriteLine(command);
+
+            if (command.ToLower() == "exit")
+                break;
+
+            string quote = reader.ReadLine();
+
+            Console.WriteLine();
+            Console.WriteLine("Цитата:");
+            Console.WriteLine(quote);
+        }
+
+        client.Close();
+    }
+
+    static void Log(string text)
+    {
+        Console.WriteLine(text);
+        File.AppendAllText("server_log.txt", text + Environment.NewLine);
+    }
+}
