@@ -1,0 +1,69 @@
+using Newtonsoft.Json.Linq;
+using System;
+using System.Net.Http;
+
+class Program
+{
+    static void Main()
+    {
+        while (true)
+        {
+            Console.WriteLine("1 - People");
+            Console.WriteLine("2 - Films");
+            Console.WriteLine("3 - Starships");
+            Console.WriteLine("4 - Vehicles");
+            Console.WriteLine("5 - Species");
+            Console.WriteLine("6 - Planets");
+            Console.WriteLine("0 - Exit");
+            Console.Write("Вибір: ");
+
+            string choice = Console.ReadLine();
+
+            if (choice == "0")
+                break;
+
+            string url = "";
+
+            switch (choice)
+            {
+                case "1":
+                    url = "https://swapi.py4e.com/api/people/";
+                    break;
+                case "2":
+                    url = "https://swapi.py4e.com/api/films/";
+                    break;
+                case "3":
+                    url = "https://swapi.py4e.com/api/starships/";
+                    break;
+                case "4":
+                    url = "https://swapi.py4e.com/api/vehicles/";
+                    break;
+                case "5":
+                    url = "https://swapi.py4e.com/api/species/";
+                    break;
+                case "6":
+                    url = "https://swapi.py4e.com/api/planets/";
+                    break;
+                default:
+                    Console.WriteLine("Невірний вибір");
+                    continue;
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                string json = client.GetStringAsync(url).Result;
+                JObject obj = JObject.Parse(json);
+
+                foreach (var item in obj["results"])
+                {
+                    if (choice == "2")
+                        Console.WriteLine(item["title"]);
+                    else
+                        Console.WriteLine(item["name"]);
+                }
+            }
+
+            Console.WriteLine();
+        }
+    }
+}
