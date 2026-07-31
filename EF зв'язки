@@ -1,0 +1,159 @@
+CREATE TABLE Developer (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Country VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Game (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Title VARCHAR(150) NOT NULL,
+    Price DECIMAL(10, 2) NOT NULL,
+    ReleaseYear INT NOT NULL,
+    DeveloperId INT NOT NULL,
+    FOREIGN KEY (DeveloperId) REFERENCES Developer(Id) ON DELETE CASCADE
+);
+
+CREATE TABLE Customer (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    FullName VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE `Order` (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerId INT NOT NULL,
+    OrderDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (CustomerId) REFERENCES Customer(Id) ON DELETE CASCADE
+);
+
+CREATE TABLE OrderItem (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    OrderId INT NOT NULL,
+    GameId INT NOT NULL,
+    Quantity INT NOT NULL CHECK (Quantity > 0),
+    FOREIGN KEY (OrderId) REFERENCES `Order`(Id) ON DELETE CASCADE,
+    FOREIGN KEY (GameId) REFERENCES Game(Id) ON DELETE CASCADE
+);
+
+INSERT INTO Developer (Name, Country) VALUES
+('CD Projekt Red', 'Poland'),
+('Valve', 'USA'),
+('FromSoftware', 'Japan'),
+('Ubisoft', 'France'),
+('Rockstar Games', 'USA');
+
+INSERT INTO Game (Title, Price, ReleaseYear, DeveloperId) VALUES
+('The Witcher 3: Wild Hunt', 29.99, 2015, 1),
+('Cyberpunk 2077', 59.99, 2020, 1),
+('Half-Life: Alyx', 49.99, 2020, 2),
+('Dota 2 - Starter Pack', 9.99, 2013, 2),
+('Elden Ring', 59.99, 2022, 3),
+('Dark Souls III', 39.99, 2016, 3),
+('Assassin''s Creed Valhalla', 49.99, 2020, 4),
+('Far Cry 6', 39.99, 2021, 4),
+('Grand Theft Auto V', 29.99, 2013, 5),
+('Red Dead Redemption 2', 59.99, 2018, 5);
+
+INSERT INTO Customer (FullName, Email) VALUES
+('Олександр Коваленко', 'oleksandr@example.com'),
+('Марія Петренко', 'maria@example.com'),
+('Іван Сидоренко', 'ivan@example.com'),
+('Анна Ткаченко', 'anna@example.com'),
+('Дмитро Кравченко', 'dmytro@example.com'),
+('Олена Бондаренко', 'olena@example.com'),
+('Максим Шевченко', 'maksym@example.com'),
+('Юлія Бойко', 'yulia@example.com');
+
+INSERT INTO `Order` (CustomerId, OrderDate) VALUES
+(1, '2026-01-10 12:00:00'),
+(2, '2026-01-15 14:30:00'),
+(1, '2026-02-01 09:15:00'),
+(3, '2026-02-10 18:20:00'),
+(4, '2026-02-28 11:45:00'),
+(5, '2026-03-05 16:00:00'),
+(2, '2026-03-12 10:10:00'),
+(6, '2026-03-20 19:00:00'),
+(7, '2026-04-01 15:30:00'),
+(1, '2026-04-10 13:25:00');
+
+INSERT INTO OrderItem (OrderId, GameId, Quantity) VALUES
+(1, 1, 1),
+(1, 2, 1),
+(2, 5, 1),
+(2, 6, 2),
+(3, 10, 1),
+(4, 3, 1),
+(4, 4, 3),
+(5, 7, 1),
+(5, 8, 1),
+(6, 9, 1),
+(6, 10, 1),
+(7, 5, 1),
+(7, 2, 1),
+(8, 1, 2),
+(8, 9, 1),
+(9, 6, 1),
+(9, 7, 1),
+(10, 5, 1),
+(10, 10, 1),
+(10, 3, 1);
+
+SELECT 
+    g.Id AS GameId,
+    g.Title AS GameTitle,
+    g.Price,
+    g.ReleaseYear,
+    d.Name AS DeveloperName,
+    d.Country AS DeveloperCountry
+FROM Game g
+INNER JOIN Developer d ON g.DeveloperId = d.Id;
+
+SELECT 
+    o.Id AS OrderId,
+    o.OrderDate,
+    c.FullName AS CustomerName,
+    c.Email AS CustomerEmail,
+    g.Title AS GameTitle,
+    oi.Quantity,
+    g.Price AS UnitPrice
+FROM `Order` o
+INNER JOIN Customer c ON o.CustomerId = c.Id
+INNER JOIN OrderItem oi ON o.Id = oi.OrderId
+INNER JOIN Game g ON oi.GameId = g.Id
+ORDER BY o.Id;
+
+SELECT 
+    o.Id AS OrderId,
+    c.FullName AS CustomerName,
+    o.OrderDate,
+    SUM(g.Price * oi.Quantity) AS TotalAmount
+FROM `Order` o
+INNER JOIN Customer c ON o.CustomerId = c.Id
+INNER JOIN OrderItem oi ON o.Id = oi.OrderId
+INNER JOIN Game g ON oi.GameId = g.Id
+GROUP BY o.Id, c.FullName, o.OrderDate
+ORDER BY o.Id;
+
+SELECT 
+    Id,
+    Title,
+    Price,
+    ReleaseYear
+FROM Game
+ORDER BY Price DESC
+LIMIT 3;
+
+SELECT 
+    c.Id AS CustomerId,
+    c.FullName,
+    c.Email,
+    COUNT(o.Id) AS OrdersCount
+FROM Customer c
+INNER JOIN `Order` o ON c.Id = o.CustomerId
+GROUP BY c.Id, c.FullName, c.Email
+HAVING COUNT(o.Id) > 1;
+
+SELECT 
+    SUM(g.Price * oi.Quantity) AS TotalRevenue
+FROM OrderItem oi
+INNER JOIN Game g ON oi.GameId = g.Id;
