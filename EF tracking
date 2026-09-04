@@ -1,0 +1,281 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
+public class Game
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = null!;
+    public decimal Price { get; set; }
+    public DateTime ReleaseDate { get; set; }
+    public double Rating { get; set; }
+    public int PublisherId { get; set; }
+    public Publisher? Publisher { get; set; }
+    public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+}
+
+public class Genre
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public ICollection<Game> Games { get; set; } = new List<Game>();
+}
+
+public class Publisher
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Country { get; set; } = null!;
+    public int FoundationYear { get; set; }
+    public string Website { get; set; } = null!;
+    public ICollection<Game> Games { get; set; } = new List<Game>();
+}
+
+public class AppDbContext : DbContext
+{
+    public DbSet<Game> Games => Set<Game>();
+    public DbSet<Genre> Genres => Set<Genre>();
+    public DbSet<Publisher> Publishers => Set<Publisher>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseInMemoryDatabase("GameStoreDb");
+    }
+}
+
+public class Repository
+{
+    public void CreateGame(Game game)
+    {
+        using var db = new AppDbContext();
+        db.Games.Add(game);
+        db.SaveChanges();
+    }
+
+    public Game? GetGameById(int id)
+    {
+        using var db = new AppDbContext();
+        var game = db.Games
+            .Include(g => g.Genres)
+            .FirstOrDefault(g => g.Id == id);
+
+        if (game != null)
+        {
+            db.Entry(game)
+              .Reference(g => g.Publisher)
+              .Load();
+        }
+
+        return game;
+    }
+
+    public List<Game> GetAllGames()
+    {
+        using var db = new AppDbContext();
+        var games = db.Games.Include(g => g.Genres).ToList();
+
+        foreach (var game in games)
+        {
+            db.Entry(game).Reference(g => g.Publisher).Load();
+        }
+
+        return games;
+    }
+
+    public void UpdateGame(Game updatedGame)
+    {
+        using var db = new AppDbContext();
+        db.Games.Update(updatedGame);
+        db.SaveChanges();
+    }
+
+    public void DeleteGame(int id)
+    {
+        using var db = new AppDbContext();
+        var game = db.Games.Find(id);
+        if (game != null)
+        {
+            db.Games.Remove(game);
+            db.SaveChanges();
+        }
+    }
+
+    public void CreateGenre(Genre genre)
+    {
+        using var db = new AppDbContext();
+        db.Genres.Add(genre);
+        db.SaveChanges();
+    }
+
+    public Genre? GetGenreById(int id)
+    {
+        using var db = new AppDbContext();
+        return db.Genres.Include(g => g.Games).FirstOrDefault(g => g.Id == id);
+    }
+
+    public List<Genre> GetAllGenres()
+    {
+        using var db = new AppDbContext();
+        return db.Genres.Include(g => g.Games).ToList();
+    }
+
+    public void UpdateGenre(Genre updatedGenre)
+    {
+        using var db = new AppDbContext();
+        db.Genres.Update(updatedGenre);
+        db.SaveChanges();
+    }
+
+    public void DeleteGenre(int id)
+    {
+        using var db = new AppDbContext();
+        var genre = db.Genres.Find(id);
+        if (genre != null)
+        {
+            db.Genres.Remove(genre);
+            db.SaveChanges();
+        }
+    }
+
+    public void CreatePublisher(Publisher publisher)
+    {
+        using var db = new AppDbContext();
+        db.Publishers.Add(publisher);
+        db.SaveChanges();
+    }
+
+    public Publisher? GetPublisherById(int id)
+    {
+        using var db = new AppDbContext();
+        var publisher = db.Publishers.Find(id);
+
+        if (publisher != null)
+        {
+            db.Entry(publisher)
+              .Collection(p => p.Games)
+              .Load();
+        }
+
+        return publisher;
+    }
+
+    public List<Publisher> GetAllPublishers()
+    {
+        using var db = new AppDbContext();
+        var publishers = db.Publishers.ToList();
+
+        foreach (var pub in publishers)
+        {
+            db.Entry(pub).Collection(p => p.Games).Load();
+        }
+
+        return publishers;
+    }
+
+    public void UpdatePublisher(Publisher updatedPublisher)
+    {
+        using var db = new AppDbContext();
+        db.Publishers.Update(updatedPublisher);
+        db.SaveChanges();
+    }
+
+    public void DeletePublisher(int id)
+    {
+        using var db = new AppDbContext();
+        var publisher = db.Publishers.Find(id);
+        if (publisher != null)
+        {
+            db.Publishers.Remove(publisher);
+            db.SaveChanges();
+        }
+    }
+
+    public List<Game> GetGamesByGenre(int genreId)
+    {
+        using var db = new AppDbContext();
+        var genre = db.Genres
+            .Include(g => g.Games)
+            .FirstOrDefault(g => g.Id == genreId);
+
+        return genre?.Games.ToList() ?? new List<Game>();
+    }
+
+    public List<Genre> GetGenresByGame(int gameId)
+    {
+        using var db = new AppDbContext();
+        var game = db.Games
+            .Include(g => g.Genres)
+            .FirstOrDefault(g => g.Id == gameId);
+
+        return game?.Genres.ToList() ?? new List<Genre>();
+    }
+
+    public List<Game> GetGamesByPublisher(int publisherId)
+    {
+        using var db = new AppDbContext();
+        var publisher = db.Publishers.Find(publisherId);
+
+        if (publisher == null) return new List<Game>();
+
+        db.Entry(publisher)
+          .Collection(p => p.Games)
+          .Load();
+
+        return publisher.Games.ToList();
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var repo = new Repository();
+
+        var pub = new Publisher
+        {
+            Name = "CD Projekt",
+            Country = "Poland",
+            FoundationYear = 1994,
+            Website = "cdprojekt.com"
+        };
+        repo.CreatePublisher(pub);
+
+        var rpgGenre = new Genre { Name = "RPG" };
+        var actionGenre = new Genre { Name = "Action" };
+        repo.CreateGenre(rpgGenre);
+        repo.CreateGenre(actionGenre);
+
+        var game = new Game
+        {
+            Title = "The Witcher 3",
+            Price = 29.99m,
+            ReleaseDate = new DateTime(2015, 5, 19),
+            Rating = 9.8,
+            PublisherId = pub.Id,
+            Genres = new[] { rpgGenre, actionGenre }
+        };
+        repo.CreateGame(game);
+
+        Console.WriteLine("Games by Genre:");
+        var rpgGames = repo.GetGamesByGenre(rpgGenre.Id);
+        foreach (var g in rpgGames)
+        {
+            Console.WriteLine($"- {g.Title}");
+        }
+
+        Console.WriteLine("\nGenres by Game:");
+        var witcherGenres = repo.GetGenresByGame(game.Id);
+        foreach (var gen in witcherGenres)
+        {
+            Console.WriteLine($"- {gen.Name}");
+        }
+
+        Console.WriteLine("\nGames by Publisher:");
+        var pubGames = repo.GetGamesByPublisher(pub.Id);
+        foreach (var g in pubGames)
+        {
+            Console.WriteLine($"- {g.Title}");
+        }
+    }
+}
