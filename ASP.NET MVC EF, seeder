@@ -1,0 +1,145 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
+public class Category
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
+    public ICollection<Product> Products { get; set; } = new List<Product>();
+}
+
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
+    public double Rating { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public int CategoryId { get; set; }
+    public Category Category { get; set; } = null!;
+}
+
+public class AppDbContext : DbContext
+{
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Product> Products => Set<Product>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseInMemoryDatabase("StoreDb");
+    }
+}
+
+public static class DbSeeder
+{
+    public static void Seed(AppDbContext db)
+    {
+        if (db.Categories.Any()) return;
+
+        var categories = new List<Category>();
+
+        for (int i = 1; i <= 10; i++)
+        {
+            var category = new Category
+            {
+                Name = $"Категорія {i}",
+                Description = $"Опис категорії {i}"
+            };
+
+            for (int j = 1; j <= 5; j++)
+            {
+                int productIndex = (i - 1) * 5 + j;
+                category.Products.Add(new Product
+                {
+                    Name = $"Товар {productIndex}",
+                    Description = $"Детальний опис товару під номером {productIndex}. Висока якість та надійність.",
+                    Price = Math.Round((decimal)(100 + productIndex * 15.5), 2),
+                    Stock = 10 + productIndex * 2,
+                    Rating = Math.Round(3.5 + (productIndex % 15) * 0.1, 1),
+                    CreatedAt = DateTime.Now.AddDays(-productIndex)
+                });
+            }
+
+            categories.Add(category);
+        }
+
+        db.Categories.AddRange(categories);
+        db.SaveChanges();
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+        using var db = new AppDbContext();
+        DbSeeder.Seed(db);
+
+        RenderHomePage(db);
+
+        Console.WriteLine("\nНатисніть Enter для перегляду деталей першого товару...");
+        Console.ReadLine();
+        Console.Clear();
+
+        RenderProductDetailsPage(db);
+    }
+
+    static void RenderHomePage(AppDbContext db)
+    {
+        Console.WriteLine("=========================================================================================");
+        Console.WriteLine("                                  ГОЛОВНА СТОРІНКА                                       ");
+        Console.WriteLine("=========================================================================================\n");
+
+        var categories = db.Categories.Include(c => c.Products).ToList();
+
+        foreach (var category in categories)
+        {
+            Console.WriteLine($"┌── [ {category.Name.ToUpper()} ] ({category.Description})");
+            Console.WriteLine("│");
+
+            foreach (var product in category.Products)
+            {
+                Console.WriteLine($"├──  ID: {product.Id,-2} | {product.Name,-10} | Ціна: {product.Price,8:C} | Оцінка: {product.Rating}/5.0 | В наявності: {product.Stock} шт.");
+            }
+            Console.WriteLine("└" + new string('─', 85) + "\n");
+        }
+    }
+
+    static void RenderProductDetailsPage(AppDbContext db)
+    {
+        var product = db.Products
+            .Include(p => p.Category)
+            .FirstOrDefault();
+
+        if (product == null)
+        {
+            Console.WriteLine("Товарів не знайдено.");
+            return;
+        }
+
+        Console.WriteLine("=========================================================================================");
+        Console.WriteLine("                           ДЕТАЛЬНА ІНФОРМАЦІЯ ПРО ТОВАР                                 ");
+        Console.WriteLine("=========================================================================================\n");
+
+        Console.WriteLine($"┌{"",-88}┐");
+        Console.WriteLine($"│  НАЗВА:       {product.Name,-72} │");
+        Console.WriteLine($"│  ID Товару:   {product.Id,-72} │");
+        Console.WriteLine($"│  Категорія:   {product.Category.Name,-72} │");
+        Console.WriteLine($"├{"",-88}┤");
+        Console.WriteLine($"│  Ціна:        {product.Price.ToString("C"),-72} │");
+        Console.WriteLine($"│  Оцінка:      {product.Rating + " / 5.0",-72} │");
+        Console.WriteLine($"│  В наявності: {product.Stock + " шт.",-72} │");
+        Console.WriteLine($"│  Додано:      {product.CreatedAt.ToString("dd.MM.yyyy HH:mm"),-72} │");
+        Console.WriteLine($"├{"",-88}┤");
+        Console.WriteLine($"│  ОПИС:                                                                                │");
+        Console.WriteLine($"│  {product.Description,-86} │");
+        Console.WriteLine($"└{"",-88}┘");
+    }
+}
