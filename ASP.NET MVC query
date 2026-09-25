@@ -1,0 +1,179 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ProductApp.Models
+{
+    public class Product
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        [Range(0.01, 100000)]
+        public decimal Price { get; set; }
+
+        [Range(1, 5)]
+        public int Rating { get; set; }
+
+        public string? ImagePath { get; set; }
+    }
+}
+
+namespace ProductApp.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class ProductsController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _env;
+
+        public ProductsController(ApplicationDbContext db, IWebHostEnvironment env)
+        {
+            _db = db;
+            _env = env;
+        }
+
+        public IActionResult Index(string sortOrder)
+        {
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.PriceAscSort = "price_asc";
+            ViewBag.PriceDescSort = "price_desc";
+            ViewBag.NameSort = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.RatingSort = "rating_desc";
+
+            var products = _db.Products.AsQueryable();
+
+            switch (sortOrder)
+            {
+                case "price_asc":
+                    products = products.OrderBy(p => p.Price);
+                    break;
+                case "price_desc":
+                    products = products.OrderByDescending(p => p.Price);
+                    break;
+                case "name_desc":
+                    products = products.OrderByDescending(p => p.Name);
+                    break;
+                case "rating_desc":
+                    products = products.OrderByDescending(p => p.Rating);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Name);
+                    break;
+            }
+
+            return View(products.ToList());
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Product product, IFormFile? imageFile)
+        {
+            if (ModelState.IsValid)
+            {
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    product.ImagePath = await SaveFileAsync(imageFile);
+                }
+
+                _db.Products.Add(product);
+                await _db.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(product);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var product = _db.Products.Find(id);
+            if (product == null) return NotFound();
+            return View(product);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Product product, IFormFile? imageFile)
+        {
+            if (id != product.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var existingProduct = await _db.Products.FindAsync(id);
+                if (existingProduct == null) return NotFound();
+
+                existingProduct.Name = product.Name;
+                existingProduct.Price = product.Price;
+                existingProduct.Rating = product.Rating;
+
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    DeleteFile(existingProduct.ImagePath);
+                    existingProduct.ImagePath = await SaveFileAsync(imageFile);
+                }
+
+                _db.Products.Update(existingProduct);
+                await _db.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(product);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var product = _db.Products.Find(id);
+            if (product == null) return NotFound();
+            return View(product);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var product = await _db.Products.FindAsync(id);
+            if (product != null)
+            {
+                DeleteFile(product.ImagePath);
+                _db.Products.Remove(product);
+                await _db.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<string> SaveFileAsync(IFormFile file)
+        {
+            string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return "/uploads/" + uniqueFileName;
+        }
+
+        private void DeleteFile(string? relativePath)
+        {
+            if (string.IsNullOrEmpty(relativePath)) return;
+
+            string fullPath = Path.Combine(_env.WebRootPath, relativePath.TrimStart('/'));
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+        }
+    }
+}
