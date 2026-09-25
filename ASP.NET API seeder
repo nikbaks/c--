@@ -1,0 +1,136 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace App.Models
+{
+    public class Developer
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        public string Position { get; set; } = string.Empty;
+    }
+}
+
+namespace App.Repositories
+{
+    public interface IDeveloperRepository
+    {
+        Task<IEnumerable<Developer>> GetAllAsync();
+        Task<Developer?> GetByIdAsync(int id);
+        Task CreateAsync(Developer developer);
+        Task UpdateAsync(Developer developer);
+        Task DeleteAsync(int id);
+    }
+
+    public class DeveloperRepository : IDeveloperRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public DeveloperRepository(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<IEnumerable<Developer>> GetAllAsync()
+        {
+            return await _db.Set<Developer>().AsNoTracking().ToListAsync();
+        }
+
+        public async Task<Developer?> GetByIdAsync(int id)
+        {
+            return await _db.Set<Developer>().FindAsync(id);
+        }
+
+        public async Task CreateAsync(Developer developer)
+        {
+            await _db.Set<Developer>().AddAsync(developer);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Developer developer)
+        {
+            _db.Set<Developer>().Update(developer);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var entity = await GetByIdAsync(id);
+            if (entity != null)
+            {
+                _db.Set<Developer>().Remove(entity);
+                await _db.SaveChangesAsync();
+            }
+        }
+    }
+}
+
+namespace App.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DeveloperController : ControllerBase
+    {
+        private readonly IDeveloperRepository _repository;
+
+        public DeveloperController(IDeveloperRepository repository)
+        {
+            _repository = repository;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var developers = await _repository.GetAllAsync();
+            return Ok(developers);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var developer = await _repository.GetByIdAsync(id);
+            if (developer == null) return NotFound();
+            return Ok(developer);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Developer developer)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            await _repository.CreateAsync(developer);
+            return CreatedAtAction(nameof(GetById), new { id = developer.Id }, developer);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Developer developer)
+        {
+            if (id != developer.Id) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            await _repository.UpdateAsync(developer);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            await _repository.DeleteAsync(id);
+            return NoContent();
+        }
+    }
+}
