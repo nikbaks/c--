@@ -1,0 +1,157 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ProductApp.Models
+{
+    public class CartItem
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public string? ImagePath { get; set; }
+        public decimal Total => Price * Quantity;
+    }
+
+    public class CartViewModel
+    {
+        public List<CartItem> Items { get; set; } = new List<CartItem>();
+        public decimal GrandTotal => Items.Sum(i => i.Total);
+    }
+}
+
+namespace ProductApp.Controllers
+{
+    public class CartController : Controller
+    {
+        private const string CartSessionKey = "CartSession";
+        private readonly ApplicationDbContext _db;
+
+        public CartController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public IActionResult Index()
+        {
+            var cart = GetCart();
+            var model = new CartViewModel { Items = cart };
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult AddToCart(int productId)
+        {
+            var product = _db.Products.Find(productId);
+            if (product == null) return NotFound();
+
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(c => c.ProductId == productId);
+
+            if (item == null)
+            {
+                cart.Add(new CartItem
+                {
+                    ProductId = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Quantity = 1,
+                    ImagePath = product.ImagePath
+                });
+            }
+            else
+            {
+                item.Quantity++;
+            }
+
+            SaveCart(cart);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult Increase(int productId)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(c => c.ProductId == productId);
+
+            if (item != null)
+            {
+                item.Quantity++;
+                SaveCart(cart);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult Decrease(int productId)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(c => c.ProductId == productId);
+
+            if (item != null)
+            {
+                item.Quantity--;
+                if (item.Quantity < 1)
+                {
+                    cart.Remove(item);
+                }
+                SaveCart(cart);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult Remove(int productId)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(c => c.ProductId == productId);
+
+            if (item != null)
+            {
+                cart.Remove(item);
+                SaveCart(cart);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult Checkout()
+        {
+            HttpContext.Session.Remove(CartSessionKey);
+            return RedirectToAction("Index", "Home");
+        }
+
+        private List<CartItem> GetCart()
+        {
+            return HttpContext.Session.Get<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+        }
+
+        private void SaveCart(List<CartItem> cart)
+        {
+            HttpContext.Session.Set(CartSessionKey, cart);
+        }
+    }
+}
+
+namespace ProductApp.Extensions
+{
+    using System.Text.Json;
+
+    public static class SessionExtensions
+    {
+        public static void Set<T>(this ISession session, string key, T value)
+        {
+            session.SetString(key, JsonSerializer.Serialize(value));
+        }
+
+        public static T? Get<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+            return value == null ? default : JsonSerializer.Deserialize<T>(value);
+        }
+    }
+}
