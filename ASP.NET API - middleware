@@ -1,0 +1,163 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using Serilog;
+
+var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("logs/app-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseSerilogRequestLogging();
+
+app.UseMiddleware<IpBlockingMiddleware>();
+
+app.UseMiddleware<ApiKeyMiddleware>();
+
+app.UseMiddleware<RequestCounterMiddleware>();
+
+app.UseMiddleware<RequestTimingMiddleware>();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
+
+app.MapControllers();
+
+app.Run();
+
+public class RequestTimingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<RequestTimingMiddleware> _logger;
+
+    public RequestTimingMiddleware(RequestDelegate next, ILogger<RequestTimingMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var startTime = DateTime.UtcNow;
+        var stopwatch = Stopwatch.StartNew();
+
+        _logger.LogInformation("Request started at: {StartTime}", startTime);
+
+        await _next(context);
+
+        stopwatch.Stop();
+        var endTime = DateTime.UtcNow;
+
+        _logger.LogInformation("Response sent at: {EndTime}. Execution time: {ElapsedMilliseconds} ms", 
+            endTime, stopwatch.ElapsedMilliseconds);
+    }
+}
+
+public class RequestLoggingMiddleware
+{
+    private readonly RequestDelegate _next;
+
+    public RequestLoggingMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        await _next(context);
+
+        stopwatch.Stop();
+
+        var method = context.Request.Method;
+        var url = $"{context.Request.Path}{context.Request.QueryString}";
+        var statusCode = context.Response.StatusCode;
+        var elapsed = stopwatch.ElapsedMilliseconds;
+
+        Console.WriteLine($"[LOG] Method: {method} | URL: {url} | Status: {statusCode} | Time: {elapsed} ms");
+    }
+}
+
+public class IpBlockingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly HashSet<string> _blockedIps = new()
+    {
+        "192.168.1.100",
+        "10.0.0.5",
+        "::1"
+    };
+
+    public IpBlockingMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var remoteIp = context.Connection.RemoteIpAddress?.ToString();
+
+        if (remoteIp is not null && _blockedIps.Contains(remoteIp))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsync("403 Forbidden: Your IP is blocked.");
+            return;
+        }
+
+        await _next(context);
+    }
+}
+
+public class RequestCounterMiddleware
+{
+    private readonly RequestDelegate _next;
+    private static long _requestCount = 0;
+
+    public RequestCounterMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var currentCount = Interlocked.Increment(ref _requestCount);
+        var method = context.Request.Method;
+        var path = context.Request.Path;
+
+        Console.WriteLine($"Request #{currentCount}: {method} {path}");
+
+        await _next(context);
+    }
+}
+
+public class ApiKeyMiddleware
+{
+    private readonly RequestDelegate _next;
+    private const string ApiKeyHeaderName = "X-API-KEY";
+    private const string ValidApiKey = "SecretApiKey123";
+
+    public ApiKeyMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        if (!context.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey) ||
+            !string.Equals(extractedApiKey, ValidApiKey, StringComparison.Ordinal))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsync("401 Unauthorized: Invalid or missing API Key.");
+            return;
+        }
+
+        await _next(context);
+    }
+}
