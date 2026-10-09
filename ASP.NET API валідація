@@ -1,0 +1,194 @@
+using AutoMapper;
+using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+public class Developer
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Position { get; set; } = string.Empty;
+}
+
+public record DeveloperCreateDto(string Name, string Email, string Position);
+public record DeveloperUpdateDto(string Name, string Email, string Position);
+public record DeveloperReadDto(int Id, string Name, string Email, string Position);
+
+public class DeveloperCreateDtoValidator : AbstractValidator<DeveloperCreateDto>
+{
+    public DeveloperCreateDtoValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Position).NotEmpty().MaximumLength(50);
+    }
+}
+
+public class DeveloperUpdateDtoValidator : AbstractValidator<DeveloperUpdateDto>
+{
+    public DeveloperUpdateDtoValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Position).NotEmpty().MaximumLength(50);
+    }
+}
+
+public class DeveloperMappingProfile : Profile
+{
+    public DeveloperMappingProfile()
+    {
+        CreateMap<Developer, DeveloperReadDto>();
+        CreateMap<DeveloperCreateDto, Developer>();
+        CreateMap<DeveloperUpdateDto, Developer>();
+    }
+}
+
+public interface IDeveloperRepository
+{
+    Task<IEnumerable<Developer>> GetAllAsync();
+    Task<Developer?> GetByIdAsync(int id);
+    Task AddAsync(Developer developer);
+    Task UpdateAsync(Developer developer);
+    Task DeleteAsync(Developer developer);
+}
+
+public class DeveloperRepository : IDeveloperRepository
+{
+    private readonly AppDbContext _context;
+
+    public DeveloperRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IEnumerable<Developer>> GetAllAsync() =>
+        await _context.Developers.AsNoTracking().ToListAsync();
+
+    public async Task<Developer?> GetByIdAsync(int id) =>
+        await _context.Developers.FindAsync(id);
+
+    public async Task AddAsync(Developer developer)
+    {
+        await _context.Developers.AddAsync(developer);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Developer developer)
+    {
+        _context.Developers.Update(developer);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Developer developer)
+    {
+        _context.Developers.Remove(developer);
+        await _context.SaveChangesAsync();
+    }
+}
+
+public interface IDeveloperService
+{
+    Task<IEnumerable<DeveloperReadDto>> GetAllAsync();
+    Task<DeveloperReadDto?> GetByIdAsync(int id);
+    Task<DeveloperReadDto> CreateAsync(DeveloperCreateDto createDto);
+    Task<bool> UpdateAsync(int id, DeveloperUpdateDto updateDto);
+    Task<bool> DeleteAsync(int id);
+}
+
+public class DeveloperService : IDeveloperService
+{
+    private readonly IDeveloperRepository _repository;
+    private readonly IMapper _mapper;
+    private readonly IValidator<DeveloperCreateDto> _createValidator;
+    private readonly IValidator<DeveloperUpdateDto> _updateValidator;
+
+    public DeveloperService(
+        IDeveloperRepository repository,
+        IMapper mapper,
+        IValidator<DeveloperCreateDto> createValidator,
+        IValidator<DeveloperUpdateDto> updateValidator)
+    {
+        _repository = repository;
+        _mapper = mapper;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
+
+    public async Task<IEnumerable<DeveloperReadDto>> GetAllAsync()
+    {
+        var developers = await _repository.GetAllAsync();
+        return _mapper.Map<IEnumerable<DeveloperReadDto>>(developers);
+    }
+
+    public async Task<DeveloperReadDto?> GetByIdAsync(int id)
+    {
+        var developer = await _repository.GetByIdAsync(id);
+        return developer is null ? null : _mapper.Map<DeveloperReadDto>(developer);
+    }
+
+    public async Task<DeveloperReadDto> CreateAsync(DeveloperCreateDto createDto)
+    {
+        await _createValidator.ValidateAndThrowAsync(createDto);
+
+        var developer = _mapper.Map<Developer>(createDto);
+        await _repository.AddAsync(developer);
+
+        return _mapper.Map<DeveloperReadDto>(developer);
+    }
+
+    public async Task<bool> UpdateAsync(int id, DeveloperUpdateDto updateDto)
+    {
+        await _updateValidator.ValidateAndThrowAsync(updateDto);
+
+        var existingDeveloper = await _repository.GetByIdAsync(id);
+        if (existingDeveloper is null) return false;
+
+        _mapper.Map(updateDto, existingDeveloper);
+        await _repository.UpdateAsync(existingDeveloper);
+
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var existingDeveloper = await _repository.GetByIdAsync(id);
+        if (existingDeveloper is null) return false;
+
+        await _repository.DeleteAsync(existingDeveloper);
+        return true;
+    }
+}
+
+[ApiController]
+[Route("api/[controller]")]
+public class DevelopersController : ControllerBase
+{
+    private readonly IDeveloperService _service;
+
+    public DevelopersController(IDeveloperService service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<DeveloperReadDto>>> GetAll()
+    {
+        var result = await _service.GetAllAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<DeveloperReadDto>> GetById(int id)
+    {
+        var result = await _service.GetByIdAsync(id);
+        if (result is null) return NotFound();
+
+        return Ok(result);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<DeveloperReadDto>> Create(DeveloperCreateDto createDto)
+    {
+        var result = await _service
