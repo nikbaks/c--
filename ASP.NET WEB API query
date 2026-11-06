@@ -1,0 +1,57 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+public class BirthdayGreetingService : BackgroundService
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public BirthdayGreetingService(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await SendBirthdayGreetingsAsync();
+            
+            var now = DateTime.UtcNow;
+            var nextRun = now.Date.AddDays(1);
+            var delay = nextRun - now;
+            
+            await Task.Delay(delay, stoppingToken);
+        }
+    }
+
+    private async Task SendBirthdayGreetingsAsync()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+
+        var today = DateTime.UtcNow;
+
+        var birthdayUsers = await context.Users
+            .Where(u => u.IsSubscribedToBirthdayGreetings 
+                        && u.DateOfBirth.HasValue 
+                        && u.DateOfBirth.Value.Month == today.Month 
+                        && u.DateOfBirth.Value.Day == today.Day)
+            .ToListAsync();
+
+        foreach (var user in birthdayUsers)
+        {
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                string subject = "З Днем Народження!";
+                string body = $"Вітаємо з днем народження, {user.Username}!";
+                await emailService.SendEmailAsync(user.Email, subject, body);
+            }
+        }
+    }
+}
